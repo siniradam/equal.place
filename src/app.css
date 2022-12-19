@@ -29,7 +29,7 @@
 
 	html,
 	body {
-		@apply bg-body;
+		@apply bg-body font-gantari;
 	}
 
 	main {
@@ -45,7 +45,7 @@
 	}
 
 	main header .logo {
-		@apply font-bold text-3xl;
+		@apply font-bold font-figtree text-3xl;
 	}
 
 	main > .container {
@@ -93,7 +93,12 @@
 		@apply h-20 flex;
 	}
 	.sidebar .bar {
-		@apply min-h-min flex-grow;
+		@apply min-h-min flex-grow overflow-auto no-scrollbar;
+		max-height: calc(100vh - 16rem);
+	}
+
+	.sidebar .bar .list {
+		@apply flex flex-col gap-3;
 	}
 
 	/*SEARCH*/
@@ -108,11 +113,12 @@
 
 	/* FEED */
 	.feed {
-		@apply flex flex-col flex-grow gap-3;
+		@apply flex flex-col flex-grow gap-4;
 	}
 
 	.contentBlock {
 		@apply bg-panel rounded-xl p-3 flex flex-row;
+		box-shadow: 0px 3px 4px rgb(0 0 0 / 10%);
 	}
 
 	.contentBlock .col1 {
@@ -120,7 +126,7 @@
 	}
 
 	.contentBlock .col1 .avatar {
-		@apply w-16 h-16 rounded-full bg-body flex items-center justify-center overflow-hidden;
+		@apply w-16 h-16;
 	}
 
 	.contentBlock .col2 {
@@ -144,7 +150,7 @@
 	}
 
 	.contentBlock textarea {
-		@apply w-full h-12 focus:h-28 focus:outline-none focus:shadow-inner;
+		@apply w-full h-12 focus:h-28 focus:outline-none focus:shadow-inner font-figtree indent-2;
 	}
 
 	/*Section*/
@@ -153,5 +159,44 @@
 	}
 	.section-title {
 		@apply my-3 font-bold text-xl;
+	}
+
+	/*Card*/
+	.card {
+		@apply rounded-xl overflow-hidden text-ellipsis p-3;
+		box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
+	}
+
+	.card.user {
+		@apply flex;
+	}
+
+	.card.user .photo {
+		@apply w-10 h-10 mr-3;
+	}
+
+	.card.user .body {
+		@apply flex-grow overflow-hidden;
+	}
+	.card.user .body .row1 {
+		@apply flex flex-row;
+	}
+
+	.card.user .body .row1 div:first-child {
+		@apply flex-grow font-bold;
+	}
+
+	.card.user .body .row2 {
+		@apply overflow-hidden text-ellipsis;
+	}
+
+	/* Common Stuff */
+	.avatar,
+	.photo {
+		@apply rounded-full bg-body flex items-center justify-center overflow-hidden flex-shrink-0;
+	}
+
+	.pk {
+		@apply font-light;
 	}
 }

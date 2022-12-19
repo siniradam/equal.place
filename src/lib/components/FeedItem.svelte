@@ -8,7 +8,7 @@
 	<!-- Col1 -->
 	<div class="col1">
 		<div class="avatar">
-			{#if $profilesStore[item.pubkey].picture}
+			{#if $profilesStore[item.pubkey]?.picture}
 				<img src={$profilesStore[item.pubkey].picture} alt={$profilesStore[item.pubkey].name} />
 			{/if}
 		</div>
@@ -18,7 +18,7 @@
 	<div class="col2">
 		<!-- Row1 -->
 		<div class="usermeta">
-			<div class="username">{$profilesStore[item.pubkey].name}</div>
+			<div class="username">{$profilesStore[item.pubkey]?.name}</div>
 			<div class="pk">{item.pubkey}</div>
 		</div>
 
@@ -26,12 +26,3 @@
 		<div class="note"><slot /></div>
 	</div>
 </div>
-<!-- 
-<small
-	>{item.pubkey}
-	{item.user != undefined
-		? item.user.name
-		: $profilesStore[item.pubkey]
-		? $profilesStore[item.pubkey].name
-		: ''}</small
-> -->

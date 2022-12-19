@@ -66,7 +66,7 @@ let NostrManager = function () {
 			if (requestGroup.length == 1) {
 				delete requests[requestIdentifier];
 				if (ws) {
-					console.log('Unsubscribing', requestIdentifier);
+					console.log('Removing task.', requestIdentifier);
 					ws.send(`["CLOSE", "${requestIdentifier}", ${JSON.stringify(filter)}]`);
 				}
 			} else {

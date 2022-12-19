@@ -19,12 +19,12 @@
 			<div class="username">
 				{$userStore.profile.name ? $userStore.profile.name : 'Unkown user'}
 			</div>
-			<div class="pk">key</div>
+			<div class="pk">{$userStore.profile.pubkey}</div>
 		</div>
 
 		<!-- Row 2 -->
 		<div class="note">
-			<textarea>Write freely.</textarea>
+			<textarea placeholder="Write freely." />
 		</div>
 	</div>
 </div>

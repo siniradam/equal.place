@@ -11,6 +11,10 @@ module.exports = {
 				panel: 'rgb(var(--panel) / <alpha-value>)',
 				content: 'rgb(var(--content) / <alpha-value>)',
 				body: 'rgb(var(--body) / <alpha-value>)'
+			},
+			fontFamily: {
+				gantari: ['Gantari'],
+				figtree: ['Figtree']
 			}
 		}
 	},

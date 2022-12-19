@@ -44,6 +44,8 @@
 	import SectionTitle from '$lib/components/SectionTitle.svelte';
 	import '../app.css';
 	import { onMount } from 'svelte';
+	import CardRoom from '$lib/components/CardRoom.svelte';
+	import CardUser from '$lib/components/CardUser.svelte';
 
 	const menu = [
 		{ icon: 'home', selected: true, href: '' },
@@ -100,12 +102,14 @@
 				<!-- Side Bar Content -->
 				<div class="bar">
 					<SectionTitle>Users</SectionTitle>
-					{#each Object.keys($profilesStore) as user}
-						<div id={user}>@{$profilesStore[user].name}</div>
-					{/each}
+					<div class="list">
+						{#each Object.keys($profilesStore) as uid}
+							<CardUser user={$profilesStore[uid]}>{uid}</CardUser>
+						{/each}
+					</div>
 					<SectionTitle>Rooms</SectionTitle>
 					{#each Object.keys($channelStore) as channel}
-						<div id={channel}>@{$channelStore[channel].content || channel}</div>
+						<CardRoom>@{$channelStore[channel].content || channel}</CardRoom>
 					{/each}
 					<SectionTitle>Recently Followed</SectionTitle>
 					<SectionTitle>Recent Interactions</SectionTitle>
