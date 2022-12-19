@@ -30,7 +30,19 @@ const contentFilter = (data) => {
 
 let NostrManager = function () {
 	// DB
-	var db = new PouchDB('profiles');
+	// var db = new PouchDB('profiles');
+
+	window.nostrlogs = [];
+
+	const addLog = (category, log) => {
+		if (log) {
+			if (!nostrlogs[category]) {
+				nostrlogs[category] = [];
+			}
+
+			nostrlogs[category].push(log);
+		}
+	};
 
 	let defaultServer = 'wss://nostr.rocks';
 	//let defaultServer = 'wss://nostr-relay.untethr.me';
@@ -40,7 +52,6 @@ let NostrManager = function () {
 	let profileFetched = false;
 
 	let requests = {};
-
 	let contacts = [];
 	const customHandlers = {
 		note: (event) => {},
@@ -66,7 +77,7 @@ let NostrManager = function () {
 			if (requestGroup.length == 1) {
 				delete requests[requestIdentifier];
 				if (ws) {
-					console.log('Removing task.', requestIdentifier);
+					addLog('closingTask', requestIdentifier);
 					ws.send(`["CLOSE", "${requestIdentifier}", ${JSON.stringify(filter)}]`);
 				}
 			} else {
@@ -103,17 +114,23 @@ let NostrManager = function () {
 	};
 
 	let handleServer = (event, relay) => {
-		//recommend_server
+		const { content, created_at, id, kind, pubkey, sig, tags } = event;
 		// console.log('Server:', event.content);
+		addLog('handleServer', event);
+		//recommend_server
 	};
 
 	let handleContacts = (event, relay) => {
+		const { content, created_at, id, kind, pubkey, sig, tags } = event;
 		// console.log('Contacts:', JSON.parse(event.content));
+		addLog('handleContacts', event);
 	};
 
 	// @ts-ignore
 	let handleReaction = (event, relay) => {
+		const { content, created_at, id, kind, pubkey, sig, tags } = event;
 		// console.log('Reaction:', event.content);
+		addLog('handleReaction', event);
 	};
 
 	// @ts-ignore
@@ -149,34 +166,43 @@ let NostrManager = function () {
 
 	let handleChannelCreate = (event, relay) => {
 		const { content, created_at, id, kind, pubkey, sig, tags } = event;
-		console.log('ChannelCreate', event);
+		// console.log('ChannelCreate', event);
+		addLog('handleChannelCreate', event);
 	};
 
 	let handleChannelMeta = (event, relay) => {
 		const { content, created_at, id, kind, pubkey, sig, tags } = event;
 		// console.log('ChannelMeta', event);
+		addLog('handleChannelMeta', event);
 	};
 
 	let handleChannelMessage = (event, relay) => {
 		const { content, created_at, id, kind, pubkey, sig, tags } = event;
 		customHandlers.channelCreate(event);
 		// console.log('ChannelMessage', event);
+		addLog('handleChannelMessage', event);
 	};
 
 	let handleChannelHideMessage = (event, relay) => {
 		const { content, created_at, id, kind, pubkey, sig, tags } = event;
 		// console.log('ChannelHideMessage', event);
+		addLog('handleChannelHideMessage', event);
 	};
 
 	let handleChannelMuteUser = (event, relay) => {
 		const { content, created_at, id, kind, pubkey, sig, tags } = event;
 		// console.log('ChannelMuteUser', event);
+		addLog('handleChannelMuteUser', event);
 	};
 	let ws;
 
 	return {
 		init: function () {
 			ws = new WebSocket('wss://nostr-pub.wellorder.net');
+
+			ws.addEventListener('close', (event) => {
+				console.log('Disconnected');
+			});
 
 			ws.addEventListener('message', (event, relay) => {
 				let data = JSON.parse(event.data);
@@ -244,6 +270,7 @@ let NostrManager = function () {
 		},
 		getFeed: function () {
 			ws.addEventListener('open', (event) => {
+				console.log('Connected');
 				ws.send(`["REQ", "feed", ${JSON.stringify(filter)}]`);
 				this.getProfile();
 			});
@@ -267,8 +294,8 @@ let NostrManager = function () {
 			// }
 
 			let filter = { authors: [pubkey], limit: 1, kinds: [0] };
-			ws.send(`["REQ", "getProfile", ${JSON.stringify(filter)}]`);
-			trackRequest('getProfile', pubkey);
+			ws.send(`["REQ", "getProfile-${pubkey}", ${JSON.stringify(filter)}]`);
+			trackRequest(`getProfile-${pubkey}`, pubkey);
 
 			return this;
 		}

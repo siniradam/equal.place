@@ -3,20 +3,24 @@
 
 	//Store
 	import { userStore, siteStore, contentStore, profilesStore, channelStore } from '$lib/store';
+	import { page } from '$app/stores';
+
 	//NoSTR
 	// import NostrManagerOne from '$lib/libraries/nostr';
 	import NostrManager from '$lib/libraries/nostr-manager';
 
-	let pool;
+	let currentUrl = '';
 
 	onMount(() => {
-		var db = new PouchDB('my_database');
-		window.db = db;
+		// var db = new PouchDB('my_database');
+		// window.db = db;
+
+		console.log(window.location.href);
 
 		NostrManager()
 			.setNoteHandler((event) => {
 				let newContent = [event, ...$contentStore];
-				if (newContent.length > 50) {
+				if (newContent.length > 150) {
 					newContent.pop();
 				}
 				// console.log('Total Content:', newContent.length);
@@ -48,13 +52,13 @@
 	import CardUser from '$lib/components/CardUser.svelte';
 
 	const menu = [
-		{ icon: 'home', selected: true, href: '' },
-		{ icon: 'bell', selected: false, href: '' },
-		{ icon: 'message', selected: false, href: '' },
-		{ icon: 'heart', selected: false, href: '' },
-		{ icon: 'user', selected: false, href: '' },
+		{ icon: 'home', selected: $page.route.id == '/', href: '/' },
+		{ icon: 'bell', selected: $page.route.id == '/notifications', href: '/notifications' },
+		{ icon: 'message', selected: $page.route.id == '/messages', href: '/messages' },
+		{ icon: 'heart', selected: $page.route.id == '/bookmarks', href: '/bookmarks' },
+		{ icon: 'user', selected: $page.route.id == '/profile', href: '/profile' },
 		{ seperator: true },
-		{ icon: 'cog', selected: false, href: '' }
+		{ icon: 'cog', selected: $page.route.id == '/settings', href: '/settings' }
 	];
 </script>
 
@@ -70,7 +74,8 @@
 					{#if menuItem.seperator}
 						<div class="seperator" />
 					{:else}
-						<button
+						<a
+							href={menuItem.href}
 							class="item {menuItem.selected ? 'selected' : ''}"
 							on:click={() => {
 								menu.forEach((m) => {
@@ -80,7 +85,7 @@
 							}}
 						>
 							<Icon icon={menuItem.icon} solid={menuItem.selected} />
-						</button>
+						</a>
 					{/if}
 				{/each}
 				<!-- <div class="item"><Icon icon="bell" /></div>
