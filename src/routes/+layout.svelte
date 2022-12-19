@@ -32,8 +32,11 @@
 				newContent[event.pubkey] = event;
 				channelStore.set(newContent);
 			})
-
-			.init();
+			.setProfileUpdate((meta) => {
+				userStore.set({ ...$userStore, profile: meta });
+			})
+			.init()
+			.getFeed();
 	});
 
 	//Visual

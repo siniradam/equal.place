@@ -120,7 +120,7 @@
 	}
 
 	.contentBlock .col1 .avatar {
-		@apply w-16 h-16 rounded-full bg-body flex items-center justify-center;
+		@apply w-16 h-16 rounded-full bg-body flex items-center justify-center overflow-hidden;
 	}
 
 	.contentBlock .col2 {
@@ -128,11 +128,11 @@
 	}
 
 	.contentBlock .col2 .usermeta {
-		@apply flex flex-row;
+		@apply flex flex-grow;
 	}
 
 	.contentBlock .col2 .usermeta .username {
-		@apply flex-grow;
+		@apply flex-grow font-bold;
 	}
 
 	.contentBlock .col2 .usermeta .pk {

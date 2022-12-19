@@ -14,6 +14,18 @@ const contentFilter = (data) => {
 	});
 };
 
+//# Filters
+// {
+//   "ids": <a list of event ids or prefixes>,
+//   "authors": <a list of pubkeys or prefixes, the pubkey of an event must be one of these>,
+//   "kinds": <a list of a kind numbers>,
+//   "#e": <a list of event ids that are referenced in an "e" tag>,
+//   "#p": <a list of pubkeys that are referenced in a "p" tag>,
+//   "since": <a timestamp, events must be newer than this to pass>,
+//   "until": <a timestamp, events must be older than this to pass>,
+//   "limit": <maximum number of events to be returned in the initial query>
+// }
+
 //+ NSFWJS
 
 let NostrManager = function () {
@@ -25,6 +37,9 @@ let NostrManager = function () {
 	let pool, privateKey, parseEvent;
 	let publicKey = 'd4cf9c207dc78d22bff7cf40cd6f611c1059c25a07844532210c6dff99690498';
 	let filter = { author: publicKey, limit: 2, skipVerification: false };
+	let profileFetched = false;
+
+	let requests = {};
 
 	let contacts = [];
 	const customHandlers = {
@@ -33,17 +48,46 @@ let NostrManager = function () {
 		contacts: (event) => {},
 		reaction: (event) => {},
 		meta: (event) => {},
-		channelCreate: (event) => {}
+		channelCreate: (event) => {},
+		profile: (event) => {}
 	};
 
-	// @ts-ignore
+	const trackRequest = (requestIdentifier, pubkey) => {
+		if (!requests[requestIdentifier]) {
+			requests[requestIdentifier] = [];
+		}
+		requests[requestIdentifier].push({ pubkey });
+	};
+
+	const completeRequest = (requestIdentifier, pubkey) => {
+		if (requests[requestIdentifier]) {
+			let requestGroup = requests[requestIdentifier];
+
+			if (requestGroup.length == 1) {
+				delete requests[requestIdentifier];
+				if (ws) {
+					console.log('Unsubscribing', requestIdentifier);
+					ws.send(`["CLOSE", "${requestIdentifier}", ${JSON.stringify(filter)}]`);
+				}
+			} else {
+				requests[requestIdentifier] = [requestGroup.filter((r) => r.pubkey != pubkey)];
+			}
+		}
+	};
+
 	let handleNote = (event, relay) => {
 		const { content, created_at, id, kind, pubkey, sig, tags } = event;
 
+		let user = contacts.find((u) => {
+			u.pubkey == event.pubkey;
+		});
+
+		if (!user) {
+			contacts.push({ pubkey, name: 'Unkown user' });
+		}
+
 		let cleanNote = {
-			user: contacts.find((u) => {
-				u.pubkey == event.pubkey;
-			}),
+			user: { pubkey, name: 'Unkown user' },
 			pubkey: event.pubkey,
 			content: event.content,
 			meta: {
@@ -58,13 +102,11 @@ let NostrManager = function () {
 		customHandlers.note(cleanNote);
 	};
 
-	// @ts-ignore
 	let handleServer = (event, relay) => {
 		//recommend_server
 		// console.log('Server:', event.content);
 	};
 
-	// @ts-ignore
 	let handleContacts = (event, relay) => {
 		// console.log('Contacts:', JSON.parse(event.content));
 	};
@@ -89,16 +131,14 @@ let NostrManager = function () {
 					tags
 				}
 			};
-			contacts.push(contact);
-			customHandlers.meta(contact);
 
-			// db.put({ _id: pubkey, ...contact }, function callback(err, result) {
-			// 	if (!err) {
-			// 		console.log('Successfully posted a todo!');
-			// 	} else {
-			// 		console.log(err);
-			// 	}
-			// });
+			if (pubkey == publicKey) {
+				profileFetched = true;
+				customHandlers.profile(contact);
+			} else {
+				contacts.push(contact);
+				customHandlers.meta(contact);
+			}
 
 			// console.log('Meta', contact);
 		} catch (error) {
@@ -132,19 +172,27 @@ let NostrManager = function () {
 		const { content, created_at, id, kind, pubkey, sig, tags } = event;
 		// console.log('ChannelMuteUser', event);
 	};
+	let ws;
 
 	return {
 		init: function () {
-			var ws = new WebSocket('wss://nostr-pub.wellorder.net');
+			ws = new WebSocket('wss://nostr-pub.wellorder.net');
 
-			ws.addEventListener('open', function (event) {
-				ws.send(`["REQ", "my-sub", ${JSON.stringify(filter)}]`);
-			});
-
-			ws.addEventListener('message', function (event, relay) {
+			ws.addEventListener('message', (event, relay) => {
 				let data = JSON.parse(event.data);
+
 				if (data[2]) {
 					let event = data[2];
+					completeRequest(data[1], event.pubkey);
+
+					if (event.kind == 1) {
+						let usr = contacts.find((u) => {
+							u.pubkey == event.pubkey;
+						});
+						if (!usr) {
+							this.getUserMeta(event.pubkey);
+						}
+					}
 
 					switch (event.kind) {
 						case 0:
@@ -175,6 +223,7 @@ let NostrManager = function () {
 					}
 				}
 			});
+
 			return this;
 		},
 		setNoteHandler: function (/** @type {any} */ method) {
@@ -187,6 +236,40 @@ let NostrManager = function () {
 		},
 		setChannelCreate: function (/** @type {any} */ method) {
 			customHandlers.channelCreate = method;
+			return this;
+		},
+		setProfileUpdate: function (/** @type {any} */ method) {
+			customHandlers.profile = method;
+			return this;
+		},
+		getFeed: function () {
+			ws.addEventListener('open', (event) => {
+				ws.send(`["REQ", "feed", ${JSON.stringify(filter)}]`);
+				this.getProfile();
+			});
+			return this;
+		},
+		getProfile: function () {
+			this.getUserMeta(publicKey);
+			return this;
+		},
+		getUserMeta: function (pubkey) {
+			//# Filters
+			// {
+			//   "ids": <a list of event ids or prefixes>,
+			//   "authors": <a list of pubkeys or prefixes, the pubkey of an event must be one of these>,
+			//   "kinds": <a list of a kind numbers>,
+			//   "#e": <a list of event ids that are referenced in an "e" tag>,
+			//   "#p": <a list of pubkeys that are referenced in a "p" tag>,
+			//   "since": <a timestamp, events must be newer than this to pass>,
+			//   "until": <a timestamp, events must be older than this to pass>,
+			//   "limit": <maximum number of events to be returned in the initial query>
+			// }
+
+			let filter = { authors: [pubkey], limit: 1, kinds: [0] };
+			ws.send(`["REQ", "getProfile", ${JSON.stringify(filter)}]`);
+			trackRequest('getProfile', pubkey);
+
 			return this;
 		}
 	};

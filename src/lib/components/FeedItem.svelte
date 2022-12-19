@@ -2,20 +2,23 @@
 	import { profilesStore } from '$lib/store';
 
 	export let item;
-	let username = $profilesStore[item.pubkey] ? $profilesStore[item.pubkey].name : 'username';
 </script>
 
 <div class="contentBlock">
 	<!-- Col1 -->
 	<div class="col1">
-		<div class="avatar" />
+		<div class="avatar">
+			{#if $profilesStore[item.pubkey].picture}
+				<img src={$profilesStore[item.pubkey].picture} alt={$profilesStore[item.pubkey].name} />
+			{/if}
+		</div>
 	</div>
 
 	<!-- Col2 -->
 	<div class="col2">
 		<!-- Row1 -->
 		<div class="usermeta">
-			<div class="username">{username}</div>
+			<div class="username">{$profilesStore[item.pubkey].name}</div>
 			<div class="pk">{item.pubkey}</div>
 		</div>
 
