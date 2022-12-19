@@ -27,8 +27,9 @@
 				contentStore.set(newContent);
 			})
 			.setMetaHandler((meta) => {
-				let newContent = { ...$profilesStore };
+				let newContent = {};
 				newContent[meta.pubkey] = meta;
+				newContent = { ...newContent, ...$profilesStore };
 				profilesStore.set(newContent);
 			})
 			.setChannelCreate((event) => {
@@ -106,9 +107,9 @@
 				<!-- /Search -->
 				<!-- Side Bar Content -->
 				<div class="bar">
-					<SectionTitle>Users</SectionTitle>
+					<SectionTitle>Fetched Users</SectionTitle>
 					<div class="list">
-						{#each Object.keys($profilesStore) as uid}
+						{#each Object.keys($profilesStore).slice(0, 15) as uid}
 							<CardUser user={$profilesStore[uid]}>{uid}</CardUser>
 						{/each}
 					</div>

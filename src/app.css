@@ -32,6 +32,10 @@
 		@apply bg-body font-gantari;
 	}
 
+	a {
+		@apply text-primary;
+	}
+
 	main {
 		@apply min-h-screen flex flex-col items-center;
 	}

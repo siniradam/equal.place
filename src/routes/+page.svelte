@@ -19,7 +19,7 @@
 <div class="feed">
 	{#each $contentStore as item}
 		<FeedItem {item}>
-			{item.content}
+			{@html item.content}
 		</FeedItem>
 	{/each}
 </div>
