@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	:root {
+		--primary: 137 181 210;
+		--secondary: 17 31 40;
+
+		--passive: 71 70 72;
+		--panel: 252 254 255;
+		--content: 231 238 242;
+		--body: 219 232 240;
+	}
+
+	.no-scrollbar::-webkit-scrollbar {
+		display: none;
+	}
+
+	/* Hide scrollbar for IE, Edge and Firefox */
+	.no-scrollbar {
+		-ms-overflow-style: none; /* IE and Edge */
+		scrollbar-width: none; /* Firefox */
+	}
+
+	input:focus {
+		@apply outline-none;
+	}
+
+	html,
+	body {
+		@apply bg-body;
+	}
+
+	main {
+		@apply min-h-screen flex flex-col items-center;
+	}
+
+	main header {
+		@apply w-full px-8 pt-8 flex;
+	}
+
+	main header .info {
+		@apply flex-grow;
+	}
+
+	main header .logo {
+		@apply font-bold text-3xl;
+	}
+
+	main > .container {
+		@apply bg-content my-3 rounded-md;
+	}
+
+	main > .container > .root {
+		@apply flex rounded gap-3 px-8 py-8;
+		@apply max-h-[calc(100vh-6rem)];
+	}
+
+	nav {
+		@apply w-24 h-3/5 bg-panel self-start flex flex-col items-center gap-3 rounded-xl p-3;
+	}
+
+	.content {
+		@apply flex flex-col flex-grow  overflow-auto no-scrollbar;
+	}
+
+	/*NAV*/
+	nav .item {
+		@apply w-16 h-16 flex items-center justify-center rounded-xl p-3;
+		@apply hover:bg-primary hover:text-white;
+	}
+
+	nav .item.selected {
+		@apply bg-primary text-white;
+	}
+
+	nav .seperator {
+		@apply flex-grow;
+	}
+
+	/*SIDEBAR*/
+	.sidebar {
+		@apply w-2/6 h-full flex flex-col gap-3;
+		min-width: 400px;
+	}
+
+	.sidebar > div {
+		@apply bg-panel rounded-xl p-3;
+	}
+
+	.sidebar .search {
+		@apply h-20 flex;
+	}
+	.sidebar .bar {
+		@apply min-h-min flex-grow;
+	}
+
+	/*SEARCH*/
+	.sidebar .search input {
+		@apply w-full indent-2;
+	}
+
+	/* Compose */
+	.compose {
+		@apply bg-panel rounded-xl;
+	}
+
+	/* FEED */
+	.feed {
+		@apply flex flex-col flex-grow gap-3;
+	}
+
+	.contentBlock {
+		@apply bg-panel rounded-xl p-3 flex flex-row;
+	}
+
+	.contentBlock .col1 {
+		@apply mr-3;
+	}
+
+	.contentBlock .col1 .avatar {
+		@apply w-16 h-16 rounded-full bg-body flex items-center justify-center;
+	}
+
+	.contentBlock .col2 {
+		@apply flex flex-col flex-grow;
+	}
+
+	.contentBlock .col2 .usermeta {
+		@apply flex flex-row;
+	}
+
+	.contentBlock .col2 .usermeta .username {
+		@apply flex-grow;
+	}
+
+	.contentBlock .col2 .usermeta .pk {
+		@apply text-right max-w-xs text-ellipsis overflow-hidden;
+	}
+
+	.contentBlock .note {
+		@apply break-all overflow-auto;
+	}
+
+	.contentBlock textarea {
+		@apply w-full h-12 focus:h-28 focus:outline-none focus:shadow-inner;
+	}
+
+	/*Section*/
+	.section {
+		@apply mb-3;
+	}
+	.section-title {
+		@apply my-3 font-bold text-xl;
+	}
+}
