@@ -6,7 +6,7 @@
 
 	let keysGenerated = false;
 	let isPrivateKey = false;
-	let justKey = '';
+	let justKey = 'd4cf9c207dc78d22bff7cf40cd6f611c1059c25a07844532210c6dff99690498';
 	let publicKey = '';
 	let privateKey = '';
 

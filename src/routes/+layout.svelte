@@ -139,13 +139,15 @@
 					<div class="bar">
 						<SectionTitle>Fetched Users</SectionTitle>
 						<div class="list">
-							{#each Object.keys($profilesStore).slice(0, 15) as uid}
+							{#each Object.keys($profilesStore).slice(0, 10) as uid}
 								<CardUser user={$profilesStore[uid]}>{uid}</CardUser>
 							{/each}
 						</div>
 						<SectionTitle>Rooms</SectionTitle>
 						{#each Object.keys($channelStore) as channel}
-							<CardRoom>@{$channelStore[channel].content || channel}</CardRoom>
+							<CardRoom room={$channelStore[channel]}
+								>{$channelStore[channel].content || channel}</CardRoom
+							>
 						{/each}
 						<!-- <SectionTitle>Recently Followed</SectionTitle> -->
 						<!-- <SectionTitle>Recent Interactions</SectionTitle> -->

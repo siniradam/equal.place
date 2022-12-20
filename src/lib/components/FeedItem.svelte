@@ -1,4 +1,7 @@
 <script>
+	import { createAvatar } from '@dicebear/avatars';
+	import * as styleBots from '@dicebear/avatars-bottts-sprites';
+
 	import { identicon } from '$lib/libraries/avatar';
 	import { profilesStore } from '$lib/store';
 	import Icon from './Icon.svelte';
@@ -17,9 +20,13 @@
 	<div class="col1">
 		<div class="avatar">
 			{#if $profilesStore[item.pubkey]?.picture}
-				<img src={$profilesStore[item.pubkey].picture} alt={$profilesStore[item.pubkey].name} />
+				<img
+					src={$profilesStore[item.pubkey].picture}
+					alt={$profilesStore[item.pubkey].name}
+					rel="noreferrer"
+				/>
 			{:else}
-				{@html identicon(item.pubkey, 80, 50)}
+				{@html createAvatar(styleBots, { seed: item.pubkey })}
 			{/if}
 		</div>
 	</div>

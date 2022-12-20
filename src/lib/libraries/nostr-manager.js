@@ -1,5 +1,12 @@
 // @ts-nocheck
 
+function keyToSomething(key) {
+	const sumOfNumbers = key
+		.replace(/[^0-9]/g, '')
+		.split('')
+		.reduce((a, b) => parseInt(a) + parseInt(b));
+}
+
 if (!String.linkify) {
 	String.prototype.linkify = function () {
 		// http://, https://, ftp://

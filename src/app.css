@@ -193,25 +193,31 @@
 		@apply flex flex-col gap-3 text-lg;
 	}
 
-	.card.user {
+	.card.user,
+	.card.group {
 		@apply flex;
 	}
 
+	.card.group .photo,
 	.card.user .photo {
 		@apply w-10 h-10 mr-3;
 	}
 
+	.card.group .body,
 	.card.user .body {
 		@apply flex-grow overflow-hidden;
 	}
+	.card.group .body .row1,
 	.card.user .body .row1 {
 		@apply flex flex-row;
 	}
 
+	.card.group .body .row1 div:first-child,
 	.card.user .body .row1 div:first-child {
 		@apply flex-grow font-bold;
 	}
 
+	.card.group .body .row2,
 	.card.user .body .row2 {
 		@apply overflow-hidden text-ellipsis;
 	}
