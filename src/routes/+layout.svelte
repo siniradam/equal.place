@@ -2,11 +2,26 @@
 	// @ts-nocheck
 
 	//Store
-	import { userStore, siteStore, contentStore, profilesStore, channelStore } from '$lib/store';
+	import {
+		userStore,
+		siteStore,
+		contentStore,
+		profilesStore,
+		channelStore,
+		userStoreDefaultValues
+	} from '$lib/store';
 	import { page } from '$app/stores';
 
+	//Visual
+	import Icon from '$lib/components/Icon.svelte';
+	import SectionTitle from '$lib/components/SectionTitle.svelte';
+	import '../app.css';
+	import { onMount } from 'svelte';
+	import CardRoom from '$lib/components/CardRoom.svelte';
+	import CardUser from '$lib/components/CardUser.svelte';
+	import AuthForm from '$lib/components/AuthForm.svelte';
+
 	//NoSTR
-	// import NostrManagerOne from '$lib/libraries/nostr';
 	import NostrManager from '$lib/libraries/nostr-manager';
 
 	let currentUrl = '';
@@ -18,14 +33,17 @@
 		userStore.set(uStore);
 	}
 
+	function logout() {
+		userStore.set(userStoreDefaultValues);
+	}
+
 	function init(key) {
 		NostrManager(key)
-			.setNoteHandler((event) => {
-				let newContent = [event, ...$contentStore];
-				if (newContent.length > 150) {
-					newContent.pop();
-				}
-				// console.log('Total Content:', newContent.length);
+			.setNoteHandler((note) => {
+				let newContent = [note, ...$contentStore];
+				// if (newContent.length > 150) {
+				// 	newContent.pop();
+				// }
 				contentStore.set(newContent);
 			})
 			.setMetaHandler((meta) => {
@@ -46,10 +64,6 @@
 			.getFeed();
 	}
 
-	function logout() {
-		userStore.set({ profile: {}, keys: {} });
-	}
-
 	onMount(() => {
 		pubkey = localStorage.getItem('public_key');
 
@@ -63,16 +77,6 @@
 			console.log('No public key have been found.');
 		}
 	});
-
-	//Visual
-	import Icon from '$lib/components/Icon.svelte';
-	import SectionTitle from '$lib/components/SectionTitle.svelte';
-	import '../app.css';
-	import { onMount } from 'svelte';
-	import CardRoom from '$lib/components/CardRoom.svelte';
-	import CardUser from '$lib/components/CardUser.svelte';
-	import Slider from '$lib/components/Slider.svelte';
-	import AuthForm from '$lib/components/AuthForm.svelte';
 
 	const menu = [
 		{ icon: 'home', selected: $page.route.id == '/', href: '/' },

@@ -1,8 +1,15 @@
 <script>
+	import { identicon } from '$lib/libraries/avatar';
 	import { profilesStore } from '$lib/store';
 	import Icon from './Icon.svelte';
-
 	export let item;
+	let username = item.pubkey.substr(0, 25);
+
+	$: {
+		if ($profilesStore[item.pubkey]?.name) {
+			username = $profilesStore[item.pubkey]?.name;
+		}
+	}
 </script>
 
 <div class="contentBlock">
@@ -11,6 +18,8 @@
 		<div class="avatar">
 			{#if $profilesStore[item.pubkey]?.picture}
 				<img src={$profilesStore[item.pubkey].picture} alt={$profilesStore[item.pubkey].name} />
+			{:else}
+				{@html identicon(item.pubkey, 80, 50)}
 			{/if}
 		</div>
 	</div>
@@ -19,7 +28,7 @@
 	<div class="col2">
 		<!-- Row1 -->
 		<div class="usermeta">
-			<div class="username">{$profilesStore[item.pubkey]?.name}</div>
+			<div class="username">{username}</div>
 			<div class="pk">{item.pubkey}</div>
 		</div>
 

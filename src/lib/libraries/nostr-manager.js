@@ -11,9 +11,9 @@ if (!String.linkify) {
 		// Email addresses
 		var emailAddressPattern = /[\w.]+@[a-zA-Z_-]+?(?:\.[a-zA-Z]{2,6})+/gim;
 
-		return this.replace(urlPattern, '<a href="$&">$&</a>')
-			.replace(pseudoUrlPattern, '$1<a href="http://$2">$2</a>')
-			.replace(emailAddressPattern, '<a href="mailto:$&">$&</a>');
+		return this.replace(urlPattern, '<a href="$&">$&</a><br>')
+			.replace(pseudoUrlPattern, '$1<a href="http://$2">$2</a><br>')
+			.replace(emailAddressPattern, '<a href="mailto:$&">$&</a><br>');
 	};
 }
 
@@ -122,6 +122,8 @@ let NostrManager = function (publicKey) {
 		let user = contacts.find((u) => {
 			u.pubkey == event.pubkey;
 		});
+
+		// console.log(event);
 
 		if (!user) {
 			contacts.push({ pubkey, name: 'Unkown user' });

@@ -21,10 +21,12 @@ export const siteStore = writable({
 	]
 });
 
-export const userStore = writable({
+export const userStoreDefaultValues = {
 	profile: {},
 	keys: {}
-});
+};
+
+export const userStore = writable(userStoreDefaultValues);
 
 export const profilesStore = writable({});
 
