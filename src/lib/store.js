@@ -23,8 +23,7 @@ export const siteStore = writable({
 
 export const userStore = writable({
 	profile: {},
-	keys: {},
-	loggedin: false
+	keys: {}
 });
 
 export const profilesStore = writable({});

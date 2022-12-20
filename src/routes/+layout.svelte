@@ -10,14 +10,16 @@
 	import NostrManager from '$lib/libraries/nostr-manager';
 
 	let currentUrl = '';
+	let pubkey;
 
-	onMount(() => {
-		// var db = new PouchDB('my_database');
-		// window.db = db;
+	function setPublicKeyInStore(justKey) {
+		let uStore = { ...$userStore };
+		uStore.keys.public = justKey;
+		userStore.set(uStore);
+	}
 
-		console.log(window.location.href);
-
-		NostrManager()
+	function init(key) {
+		NostrManager(key)
 			.setNoteHandler((event) => {
 				let newContent = [event, ...$contentStore];
 				if (newContent.length > 150) {
@@ -42,6 +44,24 @@
 			})
 			.init()
 			.getFeed();
+	}
+
+	function logout() {
+		userStore.set({ profile: {}, keys: {} });
+	}
+
+	onMount(() => {
+		pubkey = localStorage.getItem('public_key');
+
+		if (pubkey) {
+			setPublicKeyInStore(pubkey);
+			init(pubkey);
+		}
+
+		if ($userStore.keys.public) {
+		} else {
+			console.log('No public key have been found.');
+		}
 	});
 
 	//Visual
@@ -51,6 +71,8 @@
 	import { onMount } from 'svelte';
 	import CardRoom from '$lib/components/CardRoom.svelte';
 	import CardUser from '$lib/components/CardUser.svelte';
+	import Slider from '$lib/components/Slider.svelte';
+	import AuthForm from '$lib/components/AuthForm.svelte';
 
 	const menu = [
 		{ icon: 'home', selected: $page.route.id == '/', href: '/' },
@@ -58,8 +80,9 @@
 		{ icon: 'message', selected: $page.route.id == '/messages', href: '/messages' },
 		{ icon: 'heart', selected: $page.route.id == '/bookmarks', href: '/bookmarks' },
 		{ icon: 'user', selected: $page.route.id == '/profile', href: '/profile' },
+		{ icon: 'cog', selected: $page.route.id == '/settings', href: '/settings' },
 		{ seperator: true },
-		{ icon: 'cog', selected: $page.route.id == '/settings', href: '/settings' }
+		{ icon: 'exit', selected: $page.route.id == '', onclick: logout }
 	];
 </script>
 
@@ -70,59 +93,65 @@
 			<div class="logo">equal.place</div>
 		</header>
 		<div class="root">
-			<nav>
-				{#each menu as menuItem}
-					{#if menuItem.seperator}
-						<div class="seperator" />
-					{:else}
-						<a
-							href={menuItem.href}
-							class="item {menuItem.selected ? 'selected' : ''}"
-							on:click={() => {
-								menu.forEach((m) => {
-									m.selected = false;
-								});
-								menuItem.selected = true;
-							}}
-						>
-							<Icon icon={menuItem.icon} solid={menuItem.selected} />
-						</a>
-					{/if}
-				{/each}
-				<!-- <div class="item"><Icon icon="bell" /></div>
-				<div class="item"><Icon icon="message" /></div>
-				<div class="item"><Icon icon="heart" /></div>
-				<div class="item"><Icon icon="user" /></div> -->
-				<!-- <div class="item"><Icon icon="cog" /></div> -->
-			</nav>
-
-			<div class="content">
-				<slot />
-			</div>
-			<div class="sidebar">
-				<!-- Search: -->
-				<div class="search">
-					<input type="text" placeholder="search" />
-				</div>
-				<!-- /Search -->
-				<!-- Side Bar Content -->
-				<div class="bar">
-					<SectionTitle>Fetched Users</SectionTitle>
-					<div class="list">
-						{#each Object.keys($profilesStore).slice(0, 15) as uid}
-							<CardUser user={$profilesStore[uid]}>{uid}</CardUser>
-						{/each}
-					</div>
-					<SectionTitle>Rooms</SectionTitle>
-					{#each Object.keys($channelStore) as channel}
-						<CardRoom>@{$channelStore[channel].content || channel}</CardRoom>
+			{#if $userStore.keys.public}
+				<nav>
+					{#each menu as menuItem}
+						{#if menuItem.seperator}
+							<div class="seperator" />
+						{:else if menuItem.href}
+							<a
+								href={menuItem.href}
+								class="item {menuItem.selected ? 'selected' : ''}"
+								on:click={() => {
+									menu.forEach((m) => {
+										m.selected = false;
+									});
+									menuItem.selected = true;
+								}}
+							>
+								<Icon icon={menuItem.icon} solid={menuItem.selected} />
+							</a>
+						{:else}
+							<button
+								class="item {menuItem.selected ? 'selected' : ''}"
+								on:click={menuItem.onclick}
+							>
+								<Icon icon={menuItem.icon} solid={menuItem.selected} />
+							</button>
+						{/if}
 					{/each}
-					<SectionTitle>Recently Followed</SectionTitle>
-					<SectionTitle>Recent Interactions</SectionTitle>
-				</div>
+				</nav>
 
-				<!-- /Side Bar Content -->
-			</div>
+				<div class="content">
+					<slot />
+				</div>
+				<div class="sidebar">
+					<!-- Search: -->
+					<div class="search">
+						<input type="text" placeholder="search" />
+					</div>
+					<!-- /Search -->
+					<!-- Side Bar Content -->
+					<div class="bar">
+						<SectionTitle>Fetched Users</SectionTitle>
+						<div class="list">
+							{#each Object.keys($profilesStore).slice(0, 15) as uid}
+								<CardUser user={$profilesStore[uid]}>{uid}</CardUser>
+							{/each}
+						</div>
+						<SectionTitle>Rooms</SectionTitle>
+						{#each Object.keys($channelStore) as channel}
+							<CardRoom>@{$channelStore[channel].content || channel}</CardRoom>
+						{/each}
+						<!-- <SectionTitle>Recently Followed</SectionTitle> -->
+						<!-- <SectionTitle>Recent Interactions</SectionTitle> -->
+					</div>
+
+					<!-- /Side Bar Content -->
+				</div>
+			{:else}
+				<AuthForm />
+			{/if}
 		</div>
 	</div>
 </main>

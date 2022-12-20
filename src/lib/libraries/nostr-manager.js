@@ -58,7 +58,7 @@ const checkForImage = (url) => {
 
 //+ NSFWJS
 
-let NostrManager = function () {
+let NostrManager = function (publicKey) {
 	// DB
 	// var db = new PouchDB('profiles');
 
@@ -77,7 +77,7 @@ let NostrManager = function () {
 	let defaultServer = 'wss://nostr.rocks';
 	//let defaultServer = 'wss://nostr-relay.untethr.me';
 	let pool, privateKey, parseEvent;
-	let publicKey = 'd4cf9c207dc78d22bff7cf40cd6f611c1059c25a07844532210c6dff99690498';
+	// let publicKey = 'd4cf9c207dc78d22bff7cf40cd6f611c1059c25a07844532210c6dff99690498';
 	let filter = { author: publicKey, limit: 2, skipVerification: false };
 	let profileFetched = false;
 
@@ -182,10 +182,9 @@ let NostrManager = function () {
 			if (pubkey == publicKey) {
 				profileFetched = true;
 				customHandlers.profile(contact);
-			} else {
-				contacts.push(contact);
-				customHandlers.meta(contact);
 			}
+			contacts.push(contact);
+			customHandlers.meta(contact);
 
 			// console.log('Meta', contact);
 		} catch (error) {
@@ -245,6 +244,7 @@ let NostrManager = function () {
 						let usr = contacts.find((u) => {
 							u.pubkey == event.pubkey;
 						});
+
 						if (!usr) {
 							this.getUserMeta(event.pubkey);
 						}
@@ -331,8 +331,5 @@ let NostrManager = function () {
 		}
 	};
 };
-
-// 		let publicKey = 'd4cf9c207dc78d22bff7cf40cd6f611c1059c25a07844532210c6dff99690498';
-// let filter = {author: publicKey, limit: 2, skipVerification: true};
 
 export default NostrManager;

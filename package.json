@@ -30,6 +30,8 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@noble/secp256k1": "^1.7.0",
+		"buffer": "^6.0.3",
 		"events": "^3.3.0",
 		"nostr-tools": "^0.24.1"
 	}

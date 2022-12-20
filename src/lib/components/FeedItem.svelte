@@ -1,5 +1,6 @@
 <script>
 	import { profilesStore } from '$lib/store';
+	import Icon from './Icon.svelte';
 
 	export let item;
 </script>
@@ -24,5 +25,15 @@
 
 		<!-- Row 2 -->
 		<div class="note"><slot /></div>
+
+		<!-- Row 3 -->
+		<div class="actions">
+			<button class="text-like">
+				<Icon icon="heart" />
+			</button>
+			<button class="text-actionOne">
+				<Icon icon="reply" />
+			</button>
+		</div>
 	</div>
 </div>
