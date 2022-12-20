@@ -26,7 +26,7 @@ export const userStoreDefaultValues = {
 	keys: {}
 };
 
-export const userStore = writable(userStoreDefaultValues);
+export const userStore = writable(JSON.parse(JSON.stringify(userStoreDefaultValues)));
 
 export const profilesStore = writable({});
 

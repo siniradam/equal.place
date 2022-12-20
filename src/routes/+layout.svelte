@@ -24,17 +24,20 @@
 	//NoSTR
 	import NostrManager from '$lib/libraries/nostr-manager';
 
-	let currentUrl = '';
 	let pubkey;
+	let isInitiated = false;
 
 	function setPublicKeyInStore(justKey) {
 		let uStore = { ...$userStore };
 		uStore.keys.public = justKey;
 		userStore.set(uStore);
+		console.log('Logging out.');
 	}
 
 	function logout() {
 		userStore.set(userStoreDefaultValues);
+		localStorage.removeItem('public_key');
+		localStorage.removeItem('private_key');
 	}
 
 	function init(key) {
@@ -64,15 +67,17 @@
 			.getFeed();
 	}
 
-	onMount(() => {
-		pubkey = localStorage.getItem('public_key');
-
-		if (pubkey) {
-			setPublicKeyInStore(pubkey);
+	$: {
+		pubkey = $userStore.keys.public;
+		if (pubkey && !isInitiated) {
+			isInitiated = true;
 			init(pubkey);
 		}
+	}
 
+	onMount(() => {
 		if ($userStore.keys.public) {
+			console.log('Key found.');
 		} else {
 			console.log('No public key have been found.');
 		}
@@ -117,10 +122,7 @@
 									<Icon icon={menuItem.icon} solid={menuItem.selected} />
 								</a>
 							{:else}
-								<button
-									class="item {menuItem.selected ? 'selected' : ''}"
-									on:click={menuItem.onclick}
-								>
+								<button class="item" on:click={menuItem.onclick}>
 									<Icon icon={menuItem.icon} solid={menuItem.selected} />
 								</button>
 							{/if}

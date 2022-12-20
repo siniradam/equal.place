@@ -1,23 +1,40 @@
 <script>
 	import { generatePrivateKey, getPublicKey } from '$lib/libraries/keysTools';
 	import { userStore } from '$lib/store';
+	import { onMount } from 'svelte';
 	import SectionTitle from './SectionTitle.svelte';
 	import Slider from './Slider.svelte';
 
 	let keysGenerated = false;
-	let isPrivateKey = false;
+
+	//Input reference for login
 	let justKey = ''; //d4cf9c207dc78d22bff7cf40cd6f611c1059c25a07844532210c6dff99690498
+	let isPrivateKey = false; //Is key used for login private or public?
+
+	//Input References for registering.
 	let publicKey = '';
 	let privateKey = '';
 
+	onMount(() => {
+		let keyStored = localStorage.getItem('public_key');
+		if (keyStored) {
+			setKeyInStore(keyStored);
+		}
+	});
+
+	function setKeyInStore(key) {
+		let uStore = { ...$userStore };
+		uStore.keys.public = key;
+		userStore.set(uStore);
+	}
+
 	function setKeyToLogin() {
 		if (isPrivateKey) {
-			localStorage.setItem('private_key', justKey);
+			// localStorage.setItem('private_key', justKey);
+			alert('Login with private key is not enabled right now.');
 		} else {
 			localStorage.setItem('public_key', justKey);
-			let uStore = { ...$userStore };
-			uStore.keys.public = justKey;
-			userStore.set(uStore);
+			setKeyInStore(justKey);
 		}
 	}
 
@@ -36,8 +53,6 @@
 	}
 
 	function saveAndLogin() {
-		// localStorage.setItem('private_key', privateKey);
-		// localStorage.setItem('public_key', publicKey);
 		alert("I haven't finished this one yet.");
 	}
 </script>
