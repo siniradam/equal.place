@@ -66,14 +66,18 @@
 
 	main > .container > .root {
 		@apply flex rounded gap-3 px-8 py-8 justify-center;
-		@apply max-h-[calc(100vh-6rem)];
+		/* @apply md:max-h-[calc(100vh-6rem)]; */
+	}
+
+	.nav {
+		min-width: 6rem;
 	}
 
 	nav {
 		/* height: 35vh; */
 		min-height: 556px;
 		max-height: 40vh;
-		@apply w-24 bg-panel flex flex-col items-center gap-3 rounded-xl p-3;
+		@apply w-24 bg-panel flex flex-col items-center gap-3 rounded-xl p-3 fixed;
 	}
 
 	.content {

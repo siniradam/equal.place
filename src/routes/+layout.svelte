@@ -98,33 +98,35 @@
 		</header>
 		<div class="root">
 			{#if $userStore.keys.public}
-				<nav>
-					{#each menu as menuItem}
-						{#if menuItem.seperator}
-							<div class="seperator" />
-						{:else if menuItem.href}
-							<a
-								href={menuItem.href}
-								class="item {menuItem.selected ? 'selected' : ''}"
-								on:click={() => {
-									menu.forEach((m) => {
-										m.selected = false;
-									});
-									menuItem.selected = true;
-								}}
-							>
-								<Icon icon={menuItem.icon} solid={menuItem.selected} />
-							</a>
-						{:else}
-							<button
-								class="item {menuItem.selected ? 'selected' : ''}"
-								on:click={menuItem.onclick}
-							>
-								<Icon icon={menuItem.icon} solid={menuItem.selected} />
-							</button>
-						{/if}
-					{/each}
-				</nav>
+				<div class="nav">
+					<nav>
+						{#each menu as menuItem}
+							{#if menuItem.seperator}
+								<div class="seperator" />
+							{:else if menuItem.href}
+								<a
+									href={menuItem.href}
+									class="item {menuItem.selected ? 'selected' : ''}"
+									on:click={() => {
+										menu.forEach((m) => {
+											m.selected = false;
+										});
+										menuItem.selected = true;
+									}}
+								>
+									<Icon icon={menuItem.icon} solid={menuItem.selected} />
+								</a>
+							{:else}
+								<button
+									class="item {menuItem.selected ? 'selected' : ''}"
+									on:click={menuItem.onclick}
+								>
+									<Icon icon={menuItem.icon} solid={menuItem.selected} />
+								</button>
+							{/if}
+						{/each}
+					</nav>
+				</div>
 
 				<div class="content">
 					<slot />
