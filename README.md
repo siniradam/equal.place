@@ -1,6 +1,15 @@
-# equal.place
-Just another [nostr](https://github.com/nostr-protocol/nostr) web client.
 
+[![GitHub stars](https://img.shields.io/github/stars/siniradam/equal.place.svg?style=social&label=Star&maxAge=2592000)](https://GitHub.com/siniradam/equal.place/stargazers/)
+[![GitHub followers](https://img.shields.io/github/followers/siniradam.svg?style=social&label=Follow&maxAge=2592000)](https://github.com/siniradam?tab=followers) 
+
+# equal.place
+Just another [nostr](https://github.com/nostr-protocol/nostr) web client built on SvelteKit. 
+
+>You don't know what nostr is? [I can try to explain like you are five](https://gist.github.com/siniradam/73cf670871228daeaeeb7593c6d26999).
+
+![Status](https://img.shields.io/badge/Status-In%20Development-yellow?style=for-the-badge) 
+![Svelte](https://img.shields.io/badge/svelte-%23f1413d.svg?style=for-the-badge&logo=svelte&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
 ## Libraries used
 - sveltekit
@@ -8,12 +17,15 @@ Just another [nostr](https://github.com/nostr-protocol/nostr) web client.
 - dicebear - Handsome avatars
 - noble/secp256k1 - Key generation
 
+
+
 ## Important
-This is a project in progress. May not be functional.
+This is a project in progress. Some features aren't implemented.
 
 
 # Changes
 - All profiles are now stored in indexedDB
+- Platform icon is displayed if exists.
 
 ## TODO
 - ✅ Store fetched users
@@ -76,3 +88,6 @@ This is a project in progress. May not be functional.
 ### 🟦 Will be handled later on.
 ### 🔴 Can't figure out.
 ### ❌ Dead end / cancelled.
+
+---
+If you add to your stars, you would make me happy!

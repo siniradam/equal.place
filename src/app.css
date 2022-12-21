@@ -84,6 +84,10 @@
 		@apply flex flex-col flex-grow  overflow-auto no-scrollbar;
 	}
 
+	.footer-info {
+		@apply flex justify-center p-3 gap-3;
+	}
+
 	/*NAV*/
 	nav .item {
 		@apply w-16 h-16 flex items-center justify-center rounded-xl p-3 text-primary;

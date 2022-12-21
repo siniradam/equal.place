@@ -50,15 +50,12 @@ function parseTags(tags) {
 		console.error(error);
 	}
 
-	if (foundRelays.length > 0) {
-		console.log({ foundRelays });
-	}
-
 	return {
 		rootThread,
 		replyTo,
 		client,
-		events
+		events,
+		foundRelays
 	};
 }
 
@@ -188,6 +185,10 @@ let NostrManager = function (publicKey) {
 			contacts.push({ pubkey, name: 'Unkown user' });
 		}
 
+		let capturedTags = parseTags(tags);
+		let relays = [...capturedTags.foundRelays];
+		delete capturedTags.foundRelays;
+
 		let cleanNote = {
 			user: { pubkey, name: 'Unkown user' },
 			pubkey: event.pubkey,
@@ -199,8 +200,12 @@ let NostrManager = function (publicKey) {
 				sig,
 				tags
 			},
-			...parseTags(tags)
+			...capturedTags
 		};
+
+		if (relays.length) {
+			handleServerAddress(relays);
+		}
 		customHandlers.note(cleanNote);
 	};
 

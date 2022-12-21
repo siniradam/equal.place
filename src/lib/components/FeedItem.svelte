@@ -29,8 +29,6 @@
 		//e.target.setAttribute('crossorigin', 'anonymous');
 		//e.target.setAttribute('referrerpolicy', 'no-referrer');
 	}
-
-	console.log(item.client);
 </script>
 
 <div class="contentBlock">
