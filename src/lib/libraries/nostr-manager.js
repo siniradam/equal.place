@@ -219,8 +219,8 @@ let NostrManager = function (publicKey) {
 	};
 
 	let handleServerAddress = (relay) => {
-		console.log('ServerFound:', relay);
-		customHandlers.server(relay);
+		console.log('ServerFound:', [...new Set(relay)]);
+		customHandlers.server([...new Set(relay)]);
 	};
 
 	let handleContacts = (event, relay) => {
