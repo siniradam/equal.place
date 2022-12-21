@@ -7,6 +7,61 @@ function keyToSomething(key) {
 		.reduce((a, b) => parseInt(a) + parseInt(b));
 }
 
+function parseTags(tags) {
+	let tagList = [];
+	let foundRelays = [];
+
+	let client = 'unkown',
+		rootThread = '',
+		replyTo = '',
+		events = [];
+
+	try {
+		if (Array.isArray(tags)) {
+			tagList = tags.map((tagItem) => {
+				const [tag, value, relay, type] = tagItem;
+
+				if (type) {
+					if (type == 'root') {
+						rootThread = value;
+					}
+
+					if (type == 'reply') {
+						replyTo = value;
+					}
+				}
+
+				if (tag == 'client') {
+					client = value;
+				}
+
+				if (tag == 'e') {
+					events.push({ pubkey: value, type: type || '' });
+				}
+
+				if (relay) {
+					foundRelays.push(relay);
+				}
+
+				return { tag, value, relay, type };
+			});
+		}
+	} catch (error) {
+		console.error(error);
+	}
+
+	if (foundRelays.length > 0) {
+		console.log({ foundRelays });
+	}
+
+	return {
+		rootThread,
+		replyTo,
+		client,
+		events
+	};
+}
+
 if (!String.linkify) {
 	String.prototype.linkify = function () {
 		// http://, https://, ftp://
@@ -81,9 +136,7 @@ let NostrManager = function (publicKey) {
 	};
 
 	let defaultServer = 'wss://nostr.rocks';
-	//let defaultServer = 'wss://nostr-relay.untethr.me';
-	let pool, privateKey, parseEvent;
-	// let publicKey = 'd4cf9c207dc78d22bff7cf40cd6f611c1059c25a07844532210c6dff99690498';
+	let pool;
 	let filter = { author: publicKey, limit: 2, skipVerification: false };
 	let profileFetched = false;
 
@@ -145,17 +198,24 @@ let NostrManager = function (publicKey) {
 				kind,
 				sig,
 				tags
-			}
+			},
+			...parseTags(tags)
 		};
-		// console.log('NOTE:', cleanNote);
 		customHandlers.note(cleanNote);
 	};
 
 	let handleServer = (event, relay) => {
 		const { content, created_at, id, kind, pubkey, sig, tags } = event;
-		// console.log('Server:', event.content);
+		console.log('Server:', event.content);
+		customHandlers.server(event.content);
 		addLog('handleServer', event);
+		console.log({ relay });
 		//recommend_server
+	};
+
+	let handleServerAddress = (relay) => {
+		console.log('ServerFound:', relay);
+		customHandlers.server(relay);
 	};
 
 	let handleContacts = (event, relay) => {

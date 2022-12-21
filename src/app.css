@@ -172,8 +172,9 @@
 		@apply h-8 mt-3 flex gap-3 justify-end;
 	}
 
-	.contentBlock .actions button {
-		@apply w-6 h-8;
+	.contentBlock .actions button,
+	.contentBlock .actions .icon {
+		@apply w-6 h-8 flex items-center;
 	}
 
 	.contentBlock textarea {
@@ -247,7 +248,11 @@
 	/* Common Stuff */
 	.avatar,
 	.photo {
-		@apply rounded-full bg-body flex items-center justify-center overflow-hidden flex-shrink-0;
+		@apply rounded-full bg-body flex items-center justify-center overflow-hidden flex-shrink-0 relative;
+	}
+
+	.avatar .icon {
+		@apply absolute right-1 bottom-1 w-4 h-4 overflow-hidden;
 	}
 
 	.pk {

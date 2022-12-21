@@ -5,7 +5,7 @@ const dbVersion = 1;
 export const db = async function () {
 	// const dbPromise = openDB('equal', 1);
 
-	let profilesStore, roomsStore;
+	let profilesStore, roomsStore, relayStore, noteStore;
 
 	const eqdb = await openDB('equal.place', dbVersion, {
 		upgrade(db) {
@@ -20,6 +20,18 @@ export const db = async function () {
 				keyPath: 'pubkey'
 			});
 			roomsStore.createIndex('name', 'name');
+
+			//Relays
+			relayStore = db.createObjectStore('relays', {
+				keyPath: 'pubkey'
+			});
+			relayStore.createIndex('name', 'name');
+
+			//Notes
+			noteStore = db.createObjectStore('notes', {
+				keyPath: 'pubkey'
+			});
+			noteStore.createIndex('name', 'name');
 		}
 	});
 
@@ -28,6 +40,12 @@ export const db = async function () {
 
 	const getRoom = async (pubkey) => get('rooms', pubkey);
 	const addRoom = async (user) => upsert('rooms', user);
+
+	const getRelay = async (pubkey) => get('relays', pubkey);
+	const addRelay = async (user) => upsert('relays', user);
+
+	const getNote = async (pubkey) => get('notes', pubkey);
+	const addNote = async (user) => upsert('notes', user);
 
 	//Queries
 	const get = async (storeName, primaryKeyValue) => {

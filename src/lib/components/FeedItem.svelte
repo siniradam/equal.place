@@ -8,6 +8,7 @@
 
 	//SVG Icons
 	import Icon from './Icon.svelte';
+	import { clients } from '$lib/libraries/constants';
 
 	//Component Properties
 	export let item;
@@ -28,6 +29,8 @@
 		//e.target.setAttribute('crossorigin', 'anonymous');
 		//e.target.setAttribute('referrerpolicy', 'no-referrer');
 	}
+
+	console.log(item.client);
 </script>
 
 <div class="contentBlock">
@@ -61,6 +64,11 @@
 			<button class="text-actionOne">
 				<Icon icon="reply" />
 			</button>
+			{#if item.client}
+				<div class="icon">
+					<img src={clients?.[item.client] || 'unkown'} alt={`sent via ${item.client} client`} />
+				</div>
+			{/if}
 		</div>
 	</div>
 </div>
