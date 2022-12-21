@@ -6,6 +6,9 @@
 	import Slider from './Slider.svelte';
 
 	let keysGenerated = false;
+	let extensionChromeURL =
+		'https://chrome.google.com/webstore/detail/nos2x/kpgefcfmnafjgpblomihpgmejjdanjjp';
+	let extensionFirefoxURL = 'https://addons.mozilla.org/en-US/firefox/addon/nos2x/';
 
 	//Input reference for login
 	let justKey = ''; //d4cf9c207dc78d22bff7cf40cd6f611c1059c25a07844532210c6dff99690498
@@ -120,10 +123,8 @@
 		<SectionTitle>🧐 Some things to remember</SectionTitle>
 		<p>- If you lose your key you can always create a new key.</p>
 		<p>
-			- Browser extensions can help you to store your keys. <a
-				href="https://chrome.google.com/webstore/detail/nos2x/kpgefcfmnafjgpblomihpgmejjdanjjp"
-				>Chrome</a
-			>, <a href="https://addons.mozilla.org/en-US/firefox/addon/nos2x/">Firefox</a>
+			- Browser extensions can help you to store your keys. <a href={extensionChromeURL}>Chrome</a>,
+			<a href={extensionFirefoxURL}>Firefox</a>
 		</p>
 		<p>- Nostr Protocol is still in it's early stages. Weird things might happen.</p>
 	</div>

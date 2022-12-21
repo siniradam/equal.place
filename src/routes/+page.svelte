@@ -5,6 +5,8 @@
 	import SectionTitle from '$lib/components/SectionTitle.svelte';
 	import { userStore, siteStore, contentStore, profilesStore } from '$lib/store';
 
+	let currentFeedView = 'global';
+
 	let contents = [];
 	contentStore.subscribe((d) => {
 		contents = d;
@@ -15,7 +17,10 @@
 	<Compose />
 </div>
 
-<SectionTitle>Feed</SectionTitle>
+<SectionTitle>
+	<button class:passive={currentFeedView != 'feed'}>Feed</button>
+	<button class:passive={currentFeedView != 'global'}>Global</button>
+</SectionTitle>
 <div class="feed">
 	{#each $contentStore as item}
 		<FeedItem {item}>

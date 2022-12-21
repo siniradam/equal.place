@@ -67,7 +67,6 @@ const checkForImage = (url) => {
 
 let NostrManager = function (publicKey) {
 	// DB
-	// var db = new PouchDB('profiles');
 
 	window.nostrlogs = [];
 
@@ -97,7 +96,7 @@ let NostrManager = function (publicKey) {
 		reaction: (event) => {},
 		meta: (event) => {},
 		channelCreate: (event) => {},
-		profile: (event) => {}
+		profileReference: null
 	};
 
 	const trackRequest = (requestIdentifier, pubkey) => {
@@ -250,11 +249,11 @@ let NostrManager = function (publicKey) {
 					completeRequest(data[1], event.pubkey);
 
 					if (event.kind == 1) {
-						let usr = contacts.find((u) => {
+						let user = contacts.find((u) => {
 							u.pubkey == event.pubkey;
 						});
 
-						if (!usr) {
+						if (!user) {
 							this.getUserMeta(event.pubkey);
 						}
 					}
@@ -291,20 +290,24 @@ let NostrManager = function (publicKey) {
 
 			return this;
 		},
-		setNoteHandler: function (/** @type {any} */ method) {
+		setNoteHandler: function (/** @type {fuction} */ method) {
 			customHandlers.note = method;
 			return this;
 		},
-		setMetaHandler: function (/** @type {any} */ method) {
+		setMetaHandler: function (/** @type {fuction} */ method) {
 			customHandlers.meta = method;
 			return this;
 		},
-		setChannelCreate: function (/** @type {any} */ method) {
+		setChannelCreate: function (/** @type {fuction} */ method) {
 			customHandlers.channelCreate = method;
 			return this;
 		},
-		setProfileUpdate: function (/** @type {any} */ method) {
+		setProfileUpdate: function (/** @type {fuction} */ method) {
 			customHandlers.profile = method;
+			return this;
+		},
+		setExternalProfileReference: function (/** @type {fuction} */ method) {
+			customHandlers.profileReference = method;
 			return this;
 		},
 		getFeed: function () {

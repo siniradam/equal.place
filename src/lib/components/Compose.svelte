@@ -7,7 +7,7 @@
 	<div class="col1">
 		<div class="avatar">
 			{#if $userStore.profile.picture}
-				<img src={$userStore.profile.picture} alt="You" on:error={null} rel="noreferrer" />
+				<img src={$userStore.profile.picture} alt="You" referrerpolicy="no-referrer" />
 			{/if}
 		</div>
 	</div>

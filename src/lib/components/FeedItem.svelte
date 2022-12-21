@@ -1,17 +1,32 @@
 <script>
+	//AVatar
 	import { createAvatar } from '@dicebear/avatars';
 	import * as styleBots from '@dicebear/avatars-bottts-sprites';
 
-	import { identicon } from '$lib/libraries/avatar';
+	//Store
 	import { profilesStore } from '$lib/store';
+
+	//SVG Icons
 	import Icon from './Icon.svelte';
+
+	//Component Properties
 	export let item;
+
 	let username = item.pubkey.substr(0, 25);
+	let profilePicture;
 
 	$: {
 		if ($profilesStore[item.pubkey]?.name) {
 			username = $profilesStore[item.pubkey]?.name;
+			if ($profilesStore[item.pubkey]?.picture) {
+				profilePicture = $profilesStore[item.pubkey]?.picture;
+			}
 		}
+	}
+
+	function onError(e) {
+		//e.target.setAttribute('crossorigin', 'anonymous');
+		//e.target.setAttribute('referrerpolicy', 'no-referrer');
 	}
 </script>
 
@@ -19,12 +34,8 @@
 	<!-- Col1 -->
 	<div class="col1">
 		<div class="avatar">
-			{#if $profilesStore[item.pubkey]?.picture}
-				<img
-					src={$profilesStore[item.pubkey].picture}
-					alt={$profilesStore[item.pubkey].name}
-					rel="noreferrer"
-				/>
+			{#if profilePicture}
+				<img id={item.meta.id} src={profilePicture} alt={username} referrerpolicy="no-referrer" />
 			{:else}
 				{@html createAvatar(styleBots, { seed: item.pubkey })}
 			{/if}

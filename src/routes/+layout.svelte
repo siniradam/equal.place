@@ -10,6 +10,7 @@
 		channelStore,
 		userStoreDefaultValues
 	} from '$lib/store';
+
 	import { page } from '$app/stores';
 
 	//Visual
@@ -23,9 +24,12 @@
 
 	//NoSTR
 	import NostrManager from '$lib/libraries/nostr-manager';
+	import { db } from '$lib/db';
+	import { menuItems } from '$lib/libraries/constants';
 
-	let pubkey;
-	let isInitiated = false;
+	let database; //db Reference
+	let pubkey; //loggedin user key reference
+	let isInitiated = false; //Is started. (this is here to prevent a bug. I shouldn't need this.)
 
 	function setPublicKeyInStore(justKey) {
 		let uStore = { ...$userStore };
@@ -54,6 +58,8 @@
 				newContent[meta.pubkey] = meta;
 				newContent = { ...newContent, ...$profilesStore };
 				profilesStore.set(newContent);
+				// console.log(meta);
+				database.addProfile(meta);
 			})
 			.setChannelCreate((event) => {
 				let newContent = { ...$channelStore };
@@ -63,6 +69,7 @@
 			.setProfileUpdate((meta) => {
 				userStore.set({ ...$userStore, profile: meta });
 			})
+			.setExternalProfileReference((pubkey) => database.getProfile(pubkey))
 			.init()
 			.getFeed();
 	}
@@ -75,7 +82,8 @@
 		}
 	}
 
-	onMount(() => {
+	onMount(async () => {
+		database = await db();
 		if ($userStore.keys.public) {
 			console.log('Key found.');
 		} else {
@@ -84,14 +92,9 @@
 	});
 
 	const menu = [
-		{ icon: 'home', selected: $page.route.id == '/', href: '/' },
-		{ icon: 'bell', selected: $page.route.id == '/notifications', href: '/notifications' },
-		{ icon: 'message', selected: $page.route.id == '/messages', href: '/messages' },
-		{ icon: 'heart', selected: $page.route.id == '/bookmarks', href: '/bookmarks' },
-		{ icon: 'user', selected: $page.route.id == '/profile', href: '/profile' },
-		{ icon: 'cog', selected: $page.route.id == '/settings', href: '/settings' },
+		...menuItems,
 		{ seperator: true },
-		{ icon: 'exit', selected: $page.route.id == '', onclick: logout }
+		{ icon: 'exit', selected: false, onclick: logout }
 	];
 </script>
 
@@ -111,7 +114,7 @@
 							{:else if menuItem.href}
 								<a
 									href={menuItem.href}
-									class="item {menuItem.selected ? 'selected' : ''}"
+									class="item {$page.route.id == menuItem.href ? 'selected' : ''}"
 									on:click={() => {
 										menu.forEach((m) => {
 											m.selected = false;
@@ -141,9 +144,9 @@
 					<!-- /Search -->
 					<!-- Side Bar Content -->
 					<div class="bar">
-						<SectionTitle>Fetched Users</SectionTitle>
+						<SectionTitle>Last Fetched User</SectionTitle>
 						<div class="list">
-							{#each Object.keys($profilesStore).slice(0, 10) as uid}
+							{#each Object.keys($profilesStore).slice(0, 1) as uid}
 								<CardUser user={$profilesStore[uid]}>{uid}</CardUser>
 							{/each}
 						</div>

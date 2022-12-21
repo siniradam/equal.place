@@ -14,3 +14,21 @@ export function identicon(t, e = 50, i = 50) {
 		) + '</svg>'
 	);
 }
+
+// import { dbGet } from '$lib/db';
+// import { createAvatar } from '@dicebear/avatars';
+// import * as styleBots from '@dicebear/avatars-bottts-sprites';
+
+export function getProfilePicture(store, pubkey, name) {
+	// return dbGet("profiles", pubkey).then((item) => {
+	// 	if ($profilesStore[item.pubkey]?.picture)
+	// 	if (item) {
+	// 		return `<img src="${item.photo}" alt="${item.name}" rel="noreferrer" />;`;
+	// 	} else {
+	// 	}
+	// })
+	// 	{#if $profilesStore[item.pubkey]?.picture}
+	// {:else}
+	// 	{@html createAvatar(styleBots, { seed: item.pubkey })}
+	// {/if}
+}

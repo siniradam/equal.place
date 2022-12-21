@@ -184,8 +184,17 @@
 	.section {
 		@apply mb-3;
 	}
+
 	.section-title {
-		@apply my-3 font-bold text-xl;
+		@apply my-3 font-bold text-xl flex gap-3;
+	}
+
+	.section-title button {
+		@apply text-secondary;
+	}
+
+	.section-title button.passive {
+		@apply text-passive/50 hover:text-primary;
 	}
 
 	/*Card*/
