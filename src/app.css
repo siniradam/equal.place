@@ -124,6 +124,10 @@
 		@apply flex flex-col gap-3;
 	}
 
+	.sidebar .bar .list.wrap {
+		@apply flex-row flex-wrap;
+	}
+
 	/*SEARCH*/
 	.sidebar .search input {
 		@apply w-full indent-2;
@@ -249,6 +253,18 @@
 		@apply m-3;
 	}
 
+	.card.server {
+		@apply flex gap-2 items-center;
+	}
+
+	/*  */
+	.list .server {
+	}
+
+	.list .server .icon {
+		@apply w-6 h-6;
+	}
+
 	/* Common Stuff */
 	.avatar,
 	.photo {
@@ -361,5 +377,97 @@
 
 	.slider.warn.checked .knob {
 		@apply bg-white;
+	}
+}
+
+.server .servericon {
+	@apply w-12 h-12;
+}
+
+.servericon.connected #leds {
+	animation-name: running;
+	animation-duration: 3s;
+	animation-iteration-count: infinite;
+}
+
+.servericon.disconnected #leds {
+	display: none;
+}
+
+.servericon.disconnected #ul,
+.servericon.disconnected #dl {
+	display: none;
+}
+
+@keyframes running {
+	0% {
+		opacity: 1;
+	}
+	5% {
+		opacity: 0;
+	}
+	10% {
+		opacity: 1;
+	}
+	15% {
+		opacity: 0;
+	}
+	20% {
+		opacity: 1;
+	}
+	25% {
+		opacity: 1;
+	}
+	30% {
+		opacity: 0;
+	}
+	35% {
+		opacity: 0;
+	}
+	40% {
+		opacity: 1;
+	}
+
+	45% {
+		opacity: 0;
+	}
+	50% {
+		opacity: 1;
+	}
+
+	55% {
+		opacity: 1;
+	}
+
+	60% {
+		opacity: 0;
+	}
+	65% {
+		opacity: 1;
+	}
+
+	70% {
+		opacity: 0;
+	}
+
+	75% {
+		opacity: 0;
+	}
+	80% {
+		opacity: 1;
+	}
+
+	85% {
+		opacity: 1;
+	}
+
+	90% {
+		opacity: 0;
+	}
+	95% {
+		opacity: 1;
+	}
+	100% {
+		fill: lightgreen;
 	}
 }

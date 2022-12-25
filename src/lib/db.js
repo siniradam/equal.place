@@ -23,7 +23,7 @@ export const db = async function () {
 
 			//Relays
 			relayStore = db.createObjectStore('relays', {
-				keyPath: 'pubkey'
+				keyPath: 'address'
 			});
 			relayStore.createIndex('name', 'name');
 
@@ -42,7 +42,7 @@ export const db = async function () {
 	const addRoom = async (user) => upsert('rooms', user);
 
 	const getRelay = async (pubkey) => get('relays', pubkey);
-	const addRelay = async (user) => upsert('relays', user);
+	const addRelay = async (relay) => upsert('relays', relay);
 
 	const getNote = async (pubkey) => get('notes', pubkey);
 	const addNote = async (user) => upsert('notes', user);
@@ -79,9 +79,13 @@ export const db = async function () {
 	return {
 		db: eqdb,
 		getProfile,
-		getRoom,
 		addProfile,
-		addRoom
+		getRoom,
+		addRoom,
+		getRelay,
+		addRelay,
+		getNote,
+		addNote
 	};
 };
 

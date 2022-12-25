@@ -2,30 +2,23 @@
 	// @ts-nocheck
 
 	//Store
-	import {
-		userStore,
-		siteStore,
-		contentStore,
-		profilesStore,
-		channelStore,
-		userStoreDefaultValues
-	} from '$lib/store';
-
-	import { page } from '$app/stores';
+	import { userStore, siteStore, contentStore, profilesStore, channelStore } from '$lib/store';
 
 	//Visual
-	import Icon from '$lib/components/Icon.svelte';
-	import SectionTitle from '$lib/components/SectionTitle.svelte';
 	import '../app.css';
 	import { onMount } from 'svelte';
-	import CardRoom from '$lib/components/CardRoom.svelte';
-	import CardUser from '$lib/components/CardUser.svelte';
-	import AuthForm from '$lib/components/AuthForm.svelte';
+	import CardRoom from '$lib/components/Cards/CardRoom.svelte';
+	// import CardUser from '$lib/components/CardUser.svelte';
+	import AuthForm from '$lib/components/Blocks/AuthForm.svelte';
 
 	//NoSTR
 	import NostrManager from '$lib/libraries/nostr-manager';
 	import { db } from '$lib/db';
-	import { menuItems } from '$lib/libraries/constants';
+	import BarLastUser from '$lib/components/Parts/BarLastUser.svelte';
+	import BarRooms from '../lib/components/Parts/BarRooms.svelte';
+	import BarServers from '$lib/components/Parts/BarServers.svelte';
+	import Nav from '$lib/components/Parts/Nav.svelte';
+	import Footer from '$lib/components/Parts/Footer.svelte';
 
 	let database; //db Reference
 	let pubkey; //loggedin user key reference
@@ -38,21 +31,25 @@
 		console.log('Logging out.');
 	}
 
-	function logout() {
-		userStore.set(userStoreDefaultValues);
-		localStorage.removeItem('public_key');
-		localStorage.removeItem('private_key');
-	}
+	const addNoteToStore = (note) => {
+		let newContent = [note, ...$contentStore];
+		if (newContent.length > 150) {
+			newContent.pop();
+		}
+		contentStore.set(newContent);
+	};
+
+	const noteHandler = (note) => {
+		if ($contentStore.length < 10) {
+			addNoteToStore(note);
+		} else {
+			siteStore.set({ $siteStore, unreadNote: $siteStore.unreadNote + 1 });
+		}
+	};
 
 	function init(key) {
 		NostrManager(key)
-			.setNoteHandler((note) => {
-				let newContent = [note, ...$contentStore];
-				// if (newContent.length > 150) {
-				// 	newContent.pop();
-				// }
-				contentStore.set(newContent);
-			})
+			.setNoteHandler(noteHandler)
 			.setMetaHandler((meta) => {
 				let newContent = {};
 				newContent[meta.pubkey] = meta;
@@ -90,12 +87,6 @@
 			console.log('No public key have been found.');
 		}
 	});
-
-	const menu = [
-		...menuItems,
-		{ seperator: true },
-		{ icon: 'exit', selected: false, onclick: logout }
-	];
 </script>
 
 <main>
@@ -107,45 +98,11 @@
 		<div class="root">
 			{#if $userStore.keys.public}
 				<div class="nav">
-					<nav>
-						{#each menu as menuItem}
-							{#if menuItem.seperator}
-								<div class="seperator" />
-							{:else if menuItem.href}
-								<a
-									href={menuItem.href}
-									class="item {$page.route.id == menuItem.href ? 'selected' : ''}"
-									on:click={() => {
-										menu.forEach((m) => {
-											m.selected = false;
-										});
-										menuItem.selected = true;
-									}}
-								>
-									<Icon icon={menuItem.icon} solid={menuItem.selected} />
-								</a>
-							{:else}
-								<button class="item" on:click={menuItem.onclick}>
-									<Icon icon={menuItem.icon} solid={menuItem.selected} />
-								</button>
-							{/if}
-						{/each}
-					</nav>
+					<Nav />
 				</div>
-
 				<div class="content">
 					<slot />
-					<div class="footer-info">
-						<p>Made with ❤️</p>
-						<a href="https://github.com/siniradam/equal.place">
-							<img
-								src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white"
-								alt="See it on Github"
-							/>
-						</a>
-
-						<!-- (https://img.shields.io/github/stars/siniradam/equal.place.svg?style=social&label=Star&maxAge=2592000)](https://GitHub.com/siniradam/equal.place/stargazers/) -->
-					</div>
+					<Footer />
 				</div>
 				<div class="sidebar">
 					<!-- Search: -->
@@ -153,22 +110,12 @@
 						<input type="text" placeholder="search" />
 					</div>
 					<!-- /Search -->
+
 					<!-- Side Bar Content -->
 					<div class="bar">
-						<SectionTitle>Last Fetched User</SectionTitle>
-						<div class="list">
-							{#each Object.keys($profilesStore).slice(0, 1) as uid}
-								<CardUser user={$profilesStore[uid]}>{uid}</CardUser>
-							{/each}
-						</div>
-						<SectionTitle>Rooms</SectionTitle>
-						{#each Object.keys($channelStore) as channel}
-							<CardRoom room={$channelStore[channel]}
-								>{$channelStore[channel].content || channel}</CardRoom
-							>
-						{/each}
-						<!-- <SectionTitle>Recently Followed</SectionTitle> -->
-						<!-- <SectionTitle>Recent Interactions</SectionTitle> -->
+						<BarServers />
+						<BarLastUser />
+						<BarRooms />
 					</div>
 
 					<!-- /Side Bar Content -->

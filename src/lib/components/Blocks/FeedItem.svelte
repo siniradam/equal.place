@@ -7,7 +7,7 @@
 	import { profilesStore } from '$lib/store';
 
 	//SVG Icons
-	import Icon from './Icon.svelte';
+	import Icon from '../Elements/Icon.svelte';
 	import { clients } from '$lib/libraries/constants';
 
 	//Component Properties

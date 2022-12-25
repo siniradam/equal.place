@@ -2,8 +2,8 @@
 	import { generatePrivateKey, getPublicKey } from '$lib/libraries/keysTools';
 	import { userStore } from '$lib/store';
 	import { onMount } from 'svelte';
-	import SectionTitle from './SectionTitle.svelte';
-	import Slider from './Slider.svelte';
+	import SectionTitle from '$lib/components/Parts/SectionTitle.svelte';
+	import Slider from '$lib/components/Elements/Slider.svelte';
 
 	let keysGenerated = false;
 	let extensionChromeURL =
