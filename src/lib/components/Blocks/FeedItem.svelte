@@ -31,7 +31,7 @@
 	}
 </script>
 
-<div class="contentBlock">
+<div class="contentBlock bg">
 	<!-- Col1 -->
 	<div class="col1">
 		<div class="avatar">

@@ -22,6 +22,9 @@
 	<button class:passive={currentFeedView != 'global'}>Global</button>
 </SectionTitle>
 <div class="feed">
+	{#if $siteStore.unread}
+		<div>Load {$siteStore.unread > 50 ? '50' : $siteStore.unread} more</div>
+	{/if}
 	{#each $contentStore as item}
 		<FeedItem {item}>
 			{@html item.content}

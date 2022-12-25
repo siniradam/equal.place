@@ -144,8 +144,16 @@
 	}
 
 	.contentBlock {
-		@apply bg-panel rounded-xl p-3 flex flex-row;
+		@apply rounded-xl p-3 flex flex-row;
+	}
+
+	.contentBlock.bg {
+		@apply bg-panel;
 		box-shadow: 0px 3px 4px rgb(0 0 0 / 10%);
+	}
+
+	.contentBlock > .row {
+		@apply flex  flex-col mb-3 gap-3;
 	}
 
 	.contentBlock .col1 {
@@ -154,6 +162,10 @@
 
 	.contentBlock .col1 .avatar {
 		@apply w-16 h-16;
+	}
+
+	.contentBlock .col1 .avatar.big {
+		@apply w-32 h-32;
 	}
 
 	.contentBlock .col2 {
@@ -196,6 +208,10 @@
 
 	.section-title {
 		@apply my-3 font-bold text-xl flex gap-3;
+	}
+
+	.section-title.big {
+		@apply text-2xl;
 	}
 
 	.section-title button {
@@ -244,8 +260,30 @@
 		@apply overflow-hidden text-ellipsis;
 	}
 
-	.mid {
-		min-width: 500px;
+	.cardmini {
+		@apply flex gap-3;
+	}
+
+	.cardmini .photo {
+		@apply w-6 h-6;
+	}
+	.cardmini .body {
+		@apply max-w-[calc(100%-24px-12px)]; /* Photo W + Gap */
+	}
+
+	.cardmini .body .row1 {
+		@apply flex gap-3 max-w-full;
+	}
+
+	.cardmini .body .row1 div:first-child {
+		@apply overflow-hidden text-ellipsis;
+	}
+
+	.cardmini .body .row1 div:last-child {
+		@apply min-w-min whitespace-nowrap overflow-hidden text-ellipsis place-self-end;
+	}
+
+	.cardmini .body:firstchild .mid {
 		@apply flex flex-col w-7/12 gap-3;
 	}
 
@@ -299,7 +337,7 @@
 	button.primary,
 	button.secondary,
 	button.alternative {
-		@apply w-full p-3 select-none;
+		@apply w-full p-3 select-none rounded-md;
 	}
 
 	button.quarter {
@@ -324,6 +362,23 @@
 
 	button.warn {
 		@apply bg-warn;
+	}
+
+	input.configValue {
+		@apply bg-content p-1 rounded-md w-20;
+	}
+
+	input.configBig,
+	textarea.configBig {
+		@apply bg-content w-full indent-2 text-xl rounded-md;
+	}
+
+	input.configBig {
+		@apply h-16;
+	}
+
+	textarea.configBig {
+		@apply h-20;
 	}
 
 	.slider {

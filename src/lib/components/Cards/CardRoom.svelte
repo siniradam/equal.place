@@ -6,15 +6,14 @@
 	let dateLocal = dateString(room.created_at);
 </script>
 
-<div class="card group">
+<div class="cardmini group">
 	<div class="photo">
 		{@html identicon(room.pubkey)}
 	</div>
 	<div class="body">
 		<div class="row1">
-			<div>{room?.name ? room?.name : ''}</div>
+			<div>{room?.name ? room.name : room.pubkey}</div>
 			<div>{dateLocal}</div>
 		</div>
-		<div class="row2 pk"><slot /></div>
 	</div>
 </div>

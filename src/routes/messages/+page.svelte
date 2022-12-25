@@ -2,6 +2,6 @@
 	import SectionTitle from '$lib/components/Parts/SectionTitle.svelte';
 </script>
 
-<div class="contentBlock">
+<div class="contentBlock bg">
 	<SectionTitle>Messages</SectionTitle>
 </div>
