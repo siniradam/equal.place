@@ -26,6 +26,16 @@ This is a project in progress. Some features aren't implemented.
 # Changes
 - All profiles are now stored in indexedDB
 - Platform icon is displayed if exists.
+- Settings page added. (Not stored)
+- Relay status icons (testing)
+
+# In progress
+- User settings
+- Bech32
+- Storing; relays, notes, rooms ...
+
+# Next
+- change setXXX function format to "ON" format.
 
 ## TODO
 - ✅ Store fetched users

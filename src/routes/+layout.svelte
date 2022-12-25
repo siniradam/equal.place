@@ -47,25 +47,31 @@
 		}
 	};
 
+	const onChannelCreateReceived = (event) => {
+		let newContent = { ...$channelStore };
+		newContent[event.pubkey] = event;
+		channelStore.set(newContent);
+	};
+
+	const onMetaReceived = (meta) => {
+		let newContent = {};
+		newContent[meta.pubkey] = meta;
+		newContent = { ...newContent, ...$profilesStore };
+		profilesStore.set(newContent);
+		// console.log(meta);
+		database.addProfile(meta);
+	};
+
+	const onProfileInformationReceived = (meta) => {
+		userStore.set({ ...$userStore, profile: meta });
+	};
+
 	function init(key) {
 		NostrManager(key)
 			.setNoteHandler(noteHandler)
-			.setMetaHandler((meta) => {
-				let newContent = {};
-				newContent[meta.pubkey] = meta;
-				newContent = { ...newContent, ...$profilesStore };
-				profilesStore.set(newContent);
-				// console.log(meta);
-				database.addProfile(meta);
-			})
-			.setChannelCreate((event) => {
-				let newContent = { ...$channelStore };
-				newContent[event.pubkey] = event;
-				channelStore.set(newContent);
-			})
-			.setProfileUpdate((meta) => {
-				userStore.set({ ...$userStore, profile: meta });
-			})
+			.setMetaHandler(onMetaReceived)
+			.setChannelCreate(onChannelCreateReceived)
+			.setProfileUpdate(onProfileInformationReceived)
 			.setExternalProfileReference((pubkey) => database.getProfile(pubkey))
 			.init()
 			.getFeed();
