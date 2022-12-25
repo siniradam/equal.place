@@ -29,12 +29,16 @@ This is a project in progress. Some features aren't implemented.
 - Settings page added. (Not stored)
 - Relay status icons (testing)
 
-# In progress
+## In progress
 - User settings
 - Bech32
 - Storing; relays, notes, rooms ...
 
-# Next
+## Bugs 
+- 🟩 Refreshes on navigation.
+- 🟩 Connect spam, get rid of `isInitiated`.
+
+## Next In Line
 - change setXXX function format to "ON" format.
 
 ## TODO
@@ -57,10 +61,6 @@ This is a project in progress. Some features aren't implemented.
 - 🟩 Search?
 - 🟩 Private Messages
 - 🟩 Relay list (Store any seen relay address)
-
-## Required Fixes
-- 🟩 Fix: Refresh on navigation.
-- 🟩 Fix: Connect spam, get rid of `isInitiated`.
 
 
 

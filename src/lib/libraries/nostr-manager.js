@@ -119,8 +119,8 @@ const checkForImage = (url) => {
 
 let NostrManager = function (publicKey) {
 	// DB
-
 	window.nostrlogs = [];
+	let ws;
 
 	const addLog = (category, log) => {
 		if (log) {
@@ -132,46 +132,44 @@ let NostrManager = function (publicKey) {
 		}
 	};
 
-	let defaultServer = 'wss://nostr.rocks';
-	let pool;
 	let filter = { author: publicKey, limit: 2, skipVerification: false };
 	let profileFetched = false;
 
 	let requests = {};
 	let contacts = [];
+
+	// External Handlers
 	const customHandlers = {
-		note: (event) => {},
-		server: (event) => {},
-		contacts: (event) => {},
-		reaction: (event) => {},
-		meta: (event) => {},
-		channelCreate: (event) => {},
-		profileReference: null
-	};
+		note: {
+			method: (event) => {}
+		},
 
-	const trackRequest = (requestIdentifier, pubkey) => {
-		if (!requests[requestIdentifier]) {
-			requests[requestIdentifier] = [];
-		}
-		requests[requestIdentifier].push({ pubkey });
-	};
+		server: {
+			method: (event) => {}
+		},
 
-	const completeRequest = (requestIdentifier, pubkey) => {
-		if (requests[requestIdentifier]) {
-			let requestGroup = requests[requestIdentifier];
+		contacts: {
+			method: (event) => {}
+		},
 
-			if (requestGroup.length == 1) {
-				delete requests[requestIdentifier];
-				if (ws) {
-					addLog('closingTask', requestIdentifier);
-					ws.send(`["CLOSE", "${requestIdentifier}", ${JSON.stringify(filter)}]`);
-				}
-			} else {
-				requests[requestIdentifier] = [requestGroup.filter((r) => r.pubkey != pubkey)];
-			}
+		reaction: {
+			method: (event) => {}
+		},
+
+		meta: {
+			method: (event) => {}
+		},
+
+		channelCreate: {
+			method: (event) => {}
+		},
+
+		profileReference: {
+			method: null
 		}
 	};
 
+	// Local Handlers
 	let handleNote = (event, relay) => {
 		const { content, created_at, id, kind, pubkey, sig, tags } = event;
 
@@ -206,13 +204,13 @@ let NostrManager = function (publicKey) {
 		if (relays.length) {
 			handleServerAddress(relays);
 		}
-		customHandlers.note(cleanNote);
+		customHandlers.method.note(cleanNote);
 	};
 
 	let handleServer = (event, relay) => {
 		const { content, created_at, id, kind, pubkey, sig, tags } = event;
 		console.log('Server:', event.content);
-		customHandlers.server(event.content);
+		customHandlers.method.server(event.content);
 		addLog('handleServer', event);
 		console.log({ relay });
 		//recommend_server
@@ -220,7 +218,7 @@ let NostrManager = function (publicKey) {
 
 	let handleServerAddress = (relay) => {
 		console.log('ServerFound:', [...new Set(relay)]);
-		customHandlers.server([...new Set(relay)]);
+		customHandlers.method.server([...new Set(relay)]);
 	};
 
 	let handleContacts = (event, relay) => {
@@ -254,10 +252,10 @@ let NostrManager = function (publicKey) {
 
 			if (pubkey == publicKey) {
 				profileFetched = true;
-				customHandlers.profile(contact);
+				customHandlers.method.profile(contact);
 			}
 			contacts.push(contact);
-			customHandlers.meta(contact);
+			customHandlers.method.meta(contact);
 
 			// console.log('Meta', contact);
 		} catch (error) {
@@ -280,7 +278,7 @@ let NostrManager = function (publicKey) {
 
 	let handleChannelMessage = (event, relay) => {
 		const { content, created_at, id, kind, pubkey, sig, tags } = event;
-		customHandlers.channelCreate(event);
+		customHandlers.method.channelCreate(event);
 		// console.log('ChannelMessage', event);
 		addLog('handleChannelMessage', event);
 	};
@@ -296,7 +294,29 @@ let NostrManager = function (publicKey) {
 		// console.log('ChannelMuteUser', event);
 		addLog('handleChannelMuteUser', event);
 	};
-	let ws;
+
+	const trackRequest = (requestIdentifier, pubkey) => {
+		if (!requests[requestIdentifier]) {
+			requests[requestIdentifier] = [];
+		}
+		requests[requestIdentifier].push({ pubkey });
+	};
+
+	const completeRequest = (requestIdentifier, pubkey) => {
+		if (requests[requestIdentifier]) {
+			let requestGroup = requests[requestIdentifier];
+
+			if (requestGroup.length == 1) {
+				delete requests[requestIdentifier];
+				if (ws) {
+					addLog('closingTask', requestIdentifier);
+					ws.send(`["CLOSE", "${requestIdentifier}", ${JSON.stringify(filter)}]`);
+				}
+			} else {
+				requests[requestIdentifier] = [requestGroup.filter((r) => r.pubkey != pubkey)];
+			}
+		}
+	};
 
 	return {
 		init: function () {
@@ -356,23 +376,23 @@ let NostrManager = function (publicKey) {
 			return this;
 		},
 		setNoteHandler: function (/** @type {fuction} */ method) {
-			customHandlers.note = method;
+			customHandlers.method.note = method;
 			return this;
 		},
 		setMetaHandler: function (/** @type {fuction} */ method) {
-			customHandlers.meta = method;
+			customHandlers.method.meta = method;
 			return this;
 		},
 		setChannelCreate: function (/** @type {fuction} */ method) {
-			customHandlers.channelCreate = method;
+			customHandlers.method.channelCreate = method;
 			return this;
 		},
 		setProfileUpdate: function (/** @type {fuction} */ method) {
-			customHandlers.profile = method;
+			customHandlers.method.profile = method;
 			return this;
 		},
 		setExternalProfileReference: function (/** @type {fuction} */ method) {
-			customHandlers.profileReference = method;
+			customHandlers.method.profileReference = method;
 			return this;
 		},
 		getFeed: function () {
@@ -405,6 +425,14 @@ let NostrManager = function (publicKey) {
 			trackRequest(`getProfile-${pubkey}`, pubkey);
 
 			return this;
+		},
+		on: function (event, method) {
+			if (customHandlers[event]) {
+				customHandlers[event].method = method;
+			} else {
+				console.error('Unkown event', event);
+				return this;
+			}
 		}
 	};
 };

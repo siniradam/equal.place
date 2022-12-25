@@ -1,6 +1,7 @@
 import * as secp256k1 from '@noble/secp256k1';
 import { Buffer } from 'buffer';
-const { bech32, bech32m } = require('bech32');
+
+import { bech32, bech32m } from 'bech32';
 
 export function generatePrivateKey() {
 	return Buffer.from(secp256k1.utils.randomPrivateKey()).toString('hex');
