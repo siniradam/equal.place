@@ -1,4 +1,333 @@
 // @ts-nocheck
+//+ NSFWJS
+
+/** @deprecated This is stupid, better version (kind of) is on nostr-manager2.js Will be removed, new one will be renamed. */
+
+let NostrManager = function (publicKey) {
+	// DB
+	window.nostrlogs = [];
+	let ws;
+
+	const addLog = (category, log) => {
+		if (log) {
+			if (!nostrlogs[category]) {
+				nostrlogs[category] = [];
+			}
+
+			nostrlogs[category].push(log);
+		}
+	};
+
+	let filter = { author: publicKey, limit: 2, skipVerification: false };
+	let profileFetched = false;
+
+	let requests = {};
+	let contacts = [];
+
+	const handlers = {};
+
+	// Local Handlers
+	handlers.note = (event, relay) => {
+		const { content, created_at, id, kind, pubkey, sig, tags } = event;
+
+		let capturedTags = parseTags(tags);
+		let relays = [...capturedTags.foundRelays];
+		delete capturedTags.foundRelays;
+
+		let cleanNote = {
+			user: { pubkey, name: 'Unkown user' },
+			pubkey: event.pubkey,
+			content: `${event.content}`.linkify(),
+			meta: {
+				created_at,
+				id,
+				kind,
+				sig,
+				tags
+			},
+			...capturedTags
+		};
+
+		if (relays.length) {
+			handleServerAddress(relays);
+		}
+		customHandlers.note.method(cleanNote);
+	};
+
+	handlers.server = (event, relay) => {
+		const { content, created_at, id, kind, pubkey, sig, tags } = event;
+		console.log('Server:', event.content);
+		customHandlers.server.method(event.content);
+		addLog('handleServer', event);
+		console.log({ relay });
+		//recommend_server
+	};
+
+	handlers.serverAddress = (relay) => {
+		// console.log('ServerFound:', [...new Set(relay)]);
+		customHandlers.server.method([...new Set(relay)]);
+	};
+
+	handlers.contacts = (event, relay) => {
+		const { content, created_at, id, kind, pubkey, sig, tags } = event;
+		// console.log('Contacts:', JSON.parse(event.content));
+		addLog('handleContacts', event);
+	};
+
+	// @ts-ignore
+	handlers.reaction = (event, relay) => {
+		const { content, created_at, id, kind, pubkey, sig, tags } = event;
+		// console.log('Reaction:', event.content);
+		addLog('handleReaction', event);
+	};
+
+	// @ts-ignore
+	handlers.meta = (event, relay) => {
+		const { content, created_at, id, kind, pubkey, sig, tags } = event;
+		try {
+			let contact = {
+				pubkey,
+				...JSON.parse(content),
+				meta: {
+					created_at,
+					id,
+					kind,
+					sig,
+					tags
+				}
+			};
+
+			if (pubkey == publicKey) {
+				profileFetched = true;
+				customHandlers.profile.method(contact);
+			}
+			contacts.push(contact);
+			customHandlers.meta.method(contact);
+
+			// console.log('Meta', contact);
+		} catch (error) {
+			console.error(error);
+			console.log('Meta', event);
+		}
+	};
+
+	handlers.channelCreate = (event, relay) => {
+		const { content, created_at, id, kind, pubkey, sig, tags } = event;
+		// console.log('ChannelCreate', event);
+		addLog('handleChannelCreate', event);
+	};
+
+	handlers.channelMeta = (event, relay) => {
+		const { content, created_at, id, kind, pubkey, sig, tags } = event;
+		// console.log('ChannelMeta', event);
+		addLog('handleChannelMeta', event);
+	};
+
+	handlers.channelMessage = (event, relay) => {
+		const { content, created_at, id, kind, pubkey, sig, tags } = event;
+		customHandlers.channelCreate.method(event);
+		// console.log('ChannelMessage', event);
+		addLog('handleChannelMessage', event);
+	};
+
+	handlers.channelHideMessage = (event, relay) => {
+		const { content, created_at, id, kind, pubkey, sig, tags } = event;
+		// console.log('ChannelHideMessage', event);
+		addLog('handleChannelHideMessage', event);
+	};
+
+	handlers.channelMuteUser = (event, relay) => {
+		const { content, created_at, id, kind, pubkey, sig, tags } = event;
+		// console.log('ChannelMuteUser', event);
+		addLog('handleChannelMuteUser', event);
+	};
+
+	handlers.dM = (event, relay) => {};
+
+	handlers.dummy = (event, relay) => {};
+
+	//Started Subscriptions Logged Here.
+	const trackRequest = (requestIdentifier, pubkey) => {
+		if (!requests[requestIdentifier]) {
+			requests[requestIdentifier] = [];
+		}
+		requests[requestIdentifier].push({ pubkey });
+	};
+
+	const completeRequest = (requestIdentifier, pubkey) => {
+		if (requests[requestIdentifier]) {
+			let requestGroup = requests[requestIdentifier];
+
+			if (requestGroup.length == 1) {
+				delete requests[requestIdentifier];
+				if (ws) {
+					addLog('closingTask', requestIdentifier);
+					ws.send(`["CLOSE", "${requestIdentifier}", ${JSON.stringify(filter)}]`);
+				}
+			} else {
+				requests[requestIdentifier] = [requestGroup.filter((r) => r.pubkey != pubkey)];
+			}
+		}
+	};
+
+	const socketMessageHandler = (data, relay) => {
+		const { type, subscriptionName, event } = data;
+		if (type == 'EVENT' && typeof event == 'object') {
+			//Unsubsscribe from completed request subscriptions.
+			completeRequest(subscriptionName, event.pubkey);
+			//dbug
+			switch (event.kind) {
+				//Information;
+				case 0:
+					handlers.meta(event, relay);
+					break;
+
+				//Use Types
+				case 1:
+					handlers.note(event, relay);
+					break;
+				case 2:
+					handlers.server(event, relay);
+					break;
+				case 3:
+					handlers.contacts(event, relay);
+					break;
+				case 3:
+					handlers.dM(event, relay);
+					break;
+				case 7:
+					handlers.reaction(event, relay);
+					break;
+				//Chatting;
+				case 40:
+					handlers.channelCreate(event, relay);
+					break;
+				case 41:
+					handlers.channelMeta(event, relay);
+					break;
+				case 42:
+					handlers.channelMessage(event, relay);
+					break;
+				case 43:
+					handlers.channelHideMessage(event, relay);
+					break;
+				case 44:
+					handlers.channelMuteUser(event, relay);
+					break;
+				default:
+					if (event.kind && event.kind < 60) {
+						console.log(event.kind, data);
+					}
+			}
+		}
+	};
+
+	return {
+		init: function () {
+			let relayAddress = 'wss://nostr-pub.wellorder.net';
+			ws = new WebSocket(relayAddress);
+
+			ws.addEventListener('close', (event) => {
+				console.log('Disconnected');
+			});
+
+			ws.addEventListener('message', (message) => {
+				let relay = message.origin;
+				let data = JSON.parse(message.data);
+				const [type, subscriptionName, event] = data;
+
+				//If this is a note, there is a user in it.
+				if (event.kind == 1) {
+					//Event's pubkey is the user's pubkey.
+					let user = contacts.find((u) => {
+						u.pubkey == event.pubkey;
+					});
+
+					if (!user) {
+						contacts.push({ pubkey: event.pubkey, name: 'Unkown user' });
+						this.getUserMeta(event.pubkey);
+					}
+				}
+
+				socketMessageHandler({ type, subscriptionName, event }, relay);
+			});
+
+			return this;
+		},
+
+		getFeed: function () {
+			ws.addEventListener('open', (event) => {
+				console.log('Connected'); //Socket ref: , { event }
+				ws.send(`["REQ", "feed", ${JSON.stringify(filter)}]`);
+				this.getProfile();
+			});
+			return this;
+		},
+		getProfile: function () {
+			this.getUserMeta(publicKey);
+			return this;
+		},
+		getUserMeta: function (pubkey) {
+			//# Filters
+			let filter = { authors: [pubkey], limit: 1, kinds: [0] };
+			ws.send(`["REQ", "getProfile-${pubkey}", ${JSON.stringify(filter)}]`);
+			trackRequest(`getProfile-${pubkey}`, pubkey);
+
+			return this;
+		},
+		/**
+		 *
+		 * @param {Object} event
+		 * @param {Function} method
+		 * @returns
+		 */
+		on: function (event, method) {
+			if (customHandlers[event]) {
+				customHandlers[event].method = method;
+			} else {
+				console.error('Unkown event', event);
+			}
+			return this;
+		}
+	};
+};
+
+// External Handlers
+const customHandlers = {
+	note: {
+		method: (event) => {}
+	},
+
+	server: {
+		method: (event) => {}
+	},
+
+	contacts: {
+		method: (event) => {}
+	},
+
+	reaction: {
+		method: (event) => {}
+	},
+
+	meta: {
+		method: (event) => {}
+	},
+
+	channelCreate: {
+		method: (event) => {}
+	},
+
+	profile: {
+		method: (event) => {}
+	},
+
+	profileReference: {
+		method: null
+	}
+};
+
+//Utils
 
 function keyToSomething(key) {
 	const sumOfNumbers = key
@@ -76,6 +405,35 @@ if (!String.linkify) {
 	};
 }
 
+//# Filters
+// {
+//   "ids": <a list of event ids or prefixes>,
+//   "authors": <a list of pubkeys or prefixes, the pubkey of an event must be one of these>,
+//   "kinds": <a list of a kind numbers>,
+//   "#e": <a list of event ids that are referenced in an "e" tag>,
+//   "#p": <a list of pubkeys that are referenced in a "p" tag>,
+//   "since": <a timestamp, events must be newer than this to pass>,
+//   "until": <a timestamp, events must be older than this to pass>,
+//   "limit": <maximum number of events to be returned in the initial query>
+// }
+
+//# KIND references
+// 0	Metadata
+// 1	Text
+// 2	Recommend Relay
+// 3	Contact
+// 4	Encrypted Direct Messages
+// 5	Event Deletion
+// 7	Reaction
+// 40	Channel Creation
+// 41	Channel Metadata
+// 42	Channel Message
+// 43	Channel Hide Message
+// 44	Channel Mute User
+// 45-49	Public Chat Reserved
+
+//# Utils
+
 const contentFilter = (data) => {
 	let filter = [
 		'bdsmlr.com/',
@@ -103,338 +461,25 @@ const checkForImage = (url) => {
 	return result;
 };
 
-//# Filters
-// {
-//   "ids": <a list of event ids or prefixes>,
-//   "authors": <a list of pubkeys or prefixes, the pubkey of an event must be one of these>,
-//   "kinds": <a list of a kind numbers>,
-//   "#e": <a list of event ids that are referenced in an "e" tag>,
-//   "#p": <a list of pubkeys that are referenced in a "p" tag>,
-//   "since": <a timestamp, events must be newer than this to pass>,
-//   "until": <a timestamp, events must be older than this to pass>,
-//   "limit": <maximum number of events to be returned in the initial query>
-// }
-
-//+ NSFWJS
-
-let NostrManager = function (publicKey) {
-	// DB
-	window.nostrlogs = [];
-	let ws;
-
-	const addLog = (category, log) => {
-		if (log) {
-			if (!nostrlogs[category]) {
-				nostrlogs[category] = [];
-			}
-
-			nostrlogs[category].push(log);
-		}
-	};
-
-	let filter = { author: publicKey, limit: 2, skipVerification: false };
-	let profileFetched = false;
-
-	let requests = {};
-	let contacts = [];
-
-	// External Handlers
-	const customHandlers = {
-		note: {
-			method: (event) => {}
-		},
-
-		server: {
-			method: (event) => {}
-		},
-
-		contacts: {
-			method: (event) => {}
-		},
-
-		reaction: {
-			method: (event) => {}
-		},
-
-		meta: {
-			method: (event) => {}
-		},
-
-		channelCreate: {
-			method: (event) => {}
-		},
-
-		profileReference: {
-			method: null
-		}
-	};
-
-	// Local Handlers
-	let handleNote = (event, relay) => {
-		const { content, created_at, id, kind, pubkey, sig, tags } = event;
-
-		let user = contacts.find((u) => {
-			u.pubkey == event.pubkey;
-		});
-
-		// console.log(event);
-
-		if (!user) {
-			contacts.push({ pubkey, name: 'Unkown user' });
-		}
-
-		let capturedTags = parseTags(tags);
-		let relays = [...capturedTags.foundRelays];
-		delete capturedTags.foundRelays;
-
-		let cleanNote = {
-			user: { pubkey, name: 'Unkown user' },
-			pubkey: event.pubkey,
-			content: `${event.content}`.linkify(),
-			meta: {
-				created_at,
-				id,
-				kind,
-				sig,
-				tags
-			},
-			...capturedTags
-		};
-
-		if (relays.length) {
-			handleServerAddress(relays);
-		}
-		customHandlers.method.note(cleanNote);
-	};
-
-	let handleServer = (event, relay) => {
-		const { content, created_at, id, kind, pubkey, sig, tags } = event;
-		console.log('Server:', event.content);
-		customHandlers.method.server(event.content);
-		addLog('handleServer', event);
-		console.log({ relay });
-		//recommend_server
-	};
-
-	let handleServerAddress = (relay) => {
-		console.log('ServerFound:', [...new Set(relay)]);
-		customHandlers.method.server([...new Set(relay)]);
-	};
-
-	let handleContacts = (event, relay) => {
-		const { content, created_at, id, kind, pubkey, sig, tags } = event;
-		// console.log('Contacts:', JSON.parse(event.content));
-		addLog('handleContacts', event);
-	};
-
-	// @ts-ignore
-	let handleReaction = (event, relay) => {
-		const { content, created_at, id, kind, pubkey, sig, tags } = event;
-		// console.log('Reaction:', event.content);
-		addLog('handleReaction', event);
-	};
-
-	// @ts-ignore
-	let handleMeta = (event, relay) => {
-		const { content, created_at, id, kind, pubkey, sig, tags } = event;
-		try {
-			let contact = {
-				pubkey,
-				...JSON.parse(content),
-				meta: {
-					created_at,
-					id,
-					kind,
-					sig,
-					tags
-				}
-			};
-
-			if (pubkey == publicKey) {
-				profileFetched = true;
-				customHandlers.method.profile(contact);
-			}
-			contacts.push(contact);
-			customHandlers.method.meta(contact);
-
-			// console.log('Meta', contact);
-		} catch (error) {
-			console.error(error);
-			console.log('Meta', event);
-		}
-	};
-
-	let handleChannelCreate = (event, relay) => {
-		const { content, created_at, id, kind, pubkey, sig, tags } = event;
-		// console.log('ChannelCreate', event);
-		addLog('handleChannelCreate', event);
-	};
-
-	let handleChannelMeta = (event, relay) => {
-		const { content, created_at, id, kind, pubkey, sig, tags } = event;
-		// console.log('ChannelMeta', event);
-		addLog('handleChannelMeta', event);
-	};
-
-	let handleChannelMessage = (event, relay) => {
-		const { content, created_at, id, kind, pubkey, sig, tags } = event;
-		customHandlers.method.channelCreate(event);
-		// console.log('ChannelMessage', event);
-		addLog('handleChannelMessage', event);
-	};
-
-	let handleChannelHideMessage = (event, relay) => {
-		const { content, created_at, id, kind, pubkey, sig, tags } = event;
-		// console.log('ChannelHideMessage', event);
-		addLog('handleChannelHideMessage', event);
-	};
-
-	let handleChannelMuteUser = (event, relay) => {
-		const { content, created_at, id, kind, pubkey, sig, tags } = event;
-		// console.log('ChannelMuteUser', event);
-		addLog('handleChannelMuteUser', event);
-	};
-
-	const trackRequest = (requestIdentifier, pubkey) => {
-		if (!requests[requestIdentifier]) {
-			requests[requestIdentifier] = [];
-		}
-		requests[requestIdentifier].push({ pubkey });
-	};
-
-	const completeRequest = (requestIdentifier, pubkey) => {
-		if (requests[requestIdentifier]) {
-			let requestGroup = requests[requestIdentifier];
-
-			if (requestGroup.length == 1) {
-				delete requests[requestIdentifier];
-				if (ws) {
-					addLog('closingTask', requestIdentifier);
-					ws.send(`["CLOSE", "${requestIdentifier}", ${JSON.stringify(filter)}]`);
-				}
-			} else {
-				requests[requestIdentifier] = [requestGroup.filter((r) => r.pubkey != pubkey)];
-			}
-		}
-	};
-
-	return {
-		init: function () {
-			ws = new WebSocket('wss://nostr-pub.wellorder.net');
-
-			ws.addEventListener('close', (event) => {
-				console.log('Disconnected');
-			});
-
-			ws.addEventListener('message', (event, relay) => {
-				let data = JSON.parse(event.data);
-
-				if (data[2]) {
-					let event = data[2];
-					completeRequest(data[1], event.pubkey);
-
-					if (event.kind == 1) {
-						let user = contacts.find((u) => {
-							u.pubkey == event.pubkey;
-						});
-
-						if (!user) {
-							this.getUserMeta(event.pubkey);
-						}
-					}
-
-					switch (event.kind) {
-						case 0:
-							handleMeta(event, relay);
-							break;
-						case 1:
-							handleNote(event, relay);
-							break;
-						case 2:
-							handleServer(event, relay);
-							break;
-						case 3:
-							handleContacts(event, relay);
-							break;
-						case 7:
-							handleReaction(event, relay);
-						case 40:
-							handleChannelCreate(event, relay);
-						case 41:
-							handleChannelMeta(event, relay);
-						case 42:
-							handleChannelMessage(event, relay);
-						case 43:
-							handleChannelHideMessage(event, relay);
-						case 44:
-							handleChannelMuteUser(event, relay);
-						default:
-					}
-				}
-			});
-
-			return this;
-		},
-		setNoteHandler: function (/** @type {fuction} */ method) {
-			customHandlers.method.note = method;
-			return this;
-		},
-		setMetaHandler: function (/** @type {fuction} */ method) {
-			customHandlers.method.meta = method;
-			return this;
-		},
-		setChannelCreate: function (/** @type {fuction} */ method) {
-			customHandlers.method.channelCreate = method;
-			return this;
-		},
-		setProfileUpdate: function (/** @type {fuction} */ method) {
-			customHandlers.method.profile = method;
-			return this;
-		},
-		setExternalProfileReference: function (/** @type {fuction} */ method) {
-			customHandlers.method.profileReference = method;
-			return this;
-		},
-		getFeed: function () {
-			ws.addEventListener('open', (event) => {
-				console.log('Connected');
-				ws.send(`["REQ", "feed", ${JSON.stringify(filter)}]`);
-				this.getProfile();
-			});
-			return this;
-		},
-		getProfile: function () {
-			this.getUserMeta(publicKey);
-			return this;
-		},
-		getUserMeta: function (pubkey) {
-			//# Filters
-			// {
-			//   "ids": <a list of event ids or prefixes>,
-			//   "authors": <a list of pubkeys or prefixes, the pubkey of an event must be one of these>,
-			//   "kinds": <a list of a kind numbers>,
-			//   "#e": <a list of event ids that are referenced in an "e" tag>,
-			//   "#p": <a list of pubkeys that are referenced in a "p" tag>,
-			//   "since": <a timestamp, events must be newer than this to pass>,
-			//   "until": <a timestamp, events must be older than this to pass>,
-			//   "limit": <maximum number of events to be returned in the initial query>
-			// }
-
-			let filter = { authors: [pubkey], limit: 1, kinds: [0] };
-			ws.send(`["REQ", "getProfile-${pubkey}", ${JSON.stringify(filter)}]`);
-			trackRequest(`getProfile-${pubkey}`, pubkey);
-
-			return this;
-		},
-		on: function (event, method) {
-			if (customHandlers[event]) {
-				customHandlers[event].method = method;
-			} else {
-				console.error('Unkown event', event);
-				return this;
-			}
-		}
-	};
-};
-
 export default NostrManager;
+
+// setNoteHandler: function (/** @type {fuction} */ method) {
+// 	customHandlers.note.method = method;
+// 	return this;
+// },
+// setMetaHandler: function (/** @type {fuction} */ method) {
+// 	customHandlers.meta.method = method;
+// 	return this;
+// },
+// setChannelCreate: function (/** @type {fuction} */ method) {
+// 	customHandlers.channelCreate.method = method;
+// 	return this;
+// },
+// setProfileUpdate: function (/** @type {fuction} */ method) {
+// 	customHandlers.profile.method = method;
+// 	return this;
+// },
+// setExternalProfileReference: function (/** @type {fuction} */ method) {
+// 	customHandlers.profileReference.method = method;
+// 	return this;
+// },

@@ -25,6 +25,9 @@ export const clients = {
 };
 
 export const relays = [
+	'wss://nostr.rocks',
+	'wss://nostr-pub.wellorder.net',
+	'wss://relay.nostr.ch',
 	'wss://nostr.drss.io',
 	'wss://nostr-relay-dev.wlvs.space',
 	'wss://nostr.ethtozero.fr',
@@ -33,7 +36,6 @@ export const relays = [
 	'wss://nostr.bongbong.com',
 	'wss://nostr.datamagik.com',
 	'wss://nostr.roundrockbitcoiners.com',
-	'wss://nostr.rocks',
 	'wss://nostr.bitcoiner.social',
 	'wss://nostr.leximaster.com',
 	'wss://relay.nostr.pro',
@@ -70,7 +72,6 @@ export const relays = [
 	'wss://nostr.nodeofsven.com',
 	'wss://nostr.delo.software',
 	'wss://no.str.cr',
-	'wss://nostr-pub.wellorder.net',
 	'wss://nostr.mado.io',
 	'wss://nostr.8e23.net',
 	'wss://relay.nostrmoto.xyz',
@@ -101,7 +102,6 @@ export const relays = [
 	'wss://nostr.openchain.fr',
 	'wss://nostr.ono.re',
 	'wss://nostrrelay.com',
-	'wss://relay.nostr.ch',
 	'wss://nostr.nordlysln.net',
 	'wss://nostr.zerofeerouting.com',
 	'wss://nostr-01.bolt.observer',

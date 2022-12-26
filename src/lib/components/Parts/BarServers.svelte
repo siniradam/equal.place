@@ -1,6 +1,6 @@
 <script>
 	import SectionTitle from './SectionTitle.svelte';
-	import {} from '$lib/store';
+	import { siteStore } from '$lib/store';
 	import { relays } from '$lib/libraries/constants';
 	// import CardUser from './CardUser.svelte';
 	// import Icon from './Icon.svelte';
@@ -19,9 +19,9 @@
 	}, 233);
 </script>
 
-<SectionTitle>Relays</SectionTitle>
+<SectionTitle>Connected Relays</SectionTitle>
 <div class="list" class:wrap={mini}>
-	{#each relays.slice(0, 3) as relay}
+	{#each $siteStore.connectedRelays as relay}
 		<div class="card server" title={relay}>
 			<div class="icon servericon {connected ? 'connected' : 'disconnected'}">
 				<svg viewBox="0 0 420 430" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -95,11 +95,11 @@
 					</g>
 				</svg>
 			</div>
-			{#if !mini}
+			<!-- {#if !mini}
 				<div>
 					{relay.replace('wss://', '')}
 				</div>
-			{/if}
+			{/if} -->
 		</div>
 	{/each}
 </div>

@@ -4,7 +4,8 @@ import { relays } from './libraries/constants';
 export const siteStore = writable({
 	connecting: true,
 	unreadNote: 0,
-	relays: relays
+	relays: relays,
+	connectedRelays: []
 });
 
 export const userStoreDefaultValues = {
@@ -44,5 +45,5 @@ export const userStore = writable(JSON.parse(JSON.stringify(userStoreDefaultValu
 
 export const profilesStore = writable({});
 
-export const contentStore = writable([]);
+export const contentStore = writable({});
 export const channelStore = writable([]);

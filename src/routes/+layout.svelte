@@ -7,13 +7,14 @@
 	//Visual
 	import '../app.css';
 	import { onMount } from 'svelte';
-	import CardRoom from '$lib/components/Cards/CardRoom.svelte';
-	// import CardUser from '$lib/components/CardUser.svelte';
 	import AuthForm from '$lib/components/Blocks/AuthForm.svelte';
 
 	//NoSTR
-	import NostrManager from '$lib/libraries/nostr-manager';
+	// import NostrManager from '$lib/libraries/nostr-manager';
+	import NostrManager from '$lib/libraries/nostr-manager2';
 	import { db } from '$lib/db';
+
+	//Components
 	import BarLastUser from '$lib/components/Parts/BarLastUser.svelte';
 	import BarRooms from '../lib/components/Parts/BarRooms.svelte';
 	import BarServers from '$lib/components/Parts/BarServers.svelte';
@@ -24,64 +25,75 @@
 	let pubkey; //loggedin user key reference
 	let isInitiated = false; //Is started. (this is here to prevent a bug. I shouldn't need this.)
 
-	function setPublicKeyInStore(justKey) {
-		let uStore = { ...$userStore };
-		uStore.keys.public = justKey;
-		userStore.set(uStore);
-		console.log('Logging out.');
-	}
+	// function setPublicKeyInStore(justKey) {
+	// 	let uStore = { ...$userStore };
+	// 	uStore.keys.public = justKey;
+	// 	userStore.set(uStore);
+	// 	console.log('Logging out.');
+	// }
 
-	const addNoteToStore = (note) => {
-		let newContent = [note, ...$contentStore];
-		if (newContent.length > 150) {
-			newContent.pop();
-		}
-		contentStore.set(newContent);
+	// const onMetaReceived = (meta) => {
+	// 	let newContent = {};
+	// 	newContent[meta.pubkey] = meta;
+	// 	newContent = { ...newContent, ...$profilesStore };
+	// 	profilesStore.set(newContent);
+	// 	// console.log(meta);
+	// 	database.addProfile(meta);
+	// };
+
+	// const metaHandler = (meta) => {
+	// 	userStore.set({ ...$userStore, profile: meta });
+	// };
+
+	const onRelayConnected = (name, address, status) => {
+		let newSiteStore = { ...$siteStore };
+		newSiteStore.connectedRelays.push(address);
+		newSiteStore.connectedRelays = [...new Set([...newSiteStore.connectedRelays])];
+		siteStore.set(newSiteStore);
+	};
+
+	const userProfileHandler = (data) => {
+		// console.log('Profile received.');
+		userStore.set({ ...$userStore, profile: data.profile });
 	};
 
 	const noteHandler = (note) => {
-		if ($contentStore.length < 10) {
+		if (Object.keys($contentStore).length < 10) {
 			addNoteToStore(note);
 		} else {
 			siteStore.set({ $siteStore, unreadNote: $siteStore.unreadNote + 1 });
 		}
 	};
 
-	const onChannelCreateReceived = (event) => {
-		let newContent = { ...$channelStore };
-		newContent[event.pubkey] = event;
-		channelStore.set(newContent);
-	};
+	const addNoteToStore = (note) => {
+		if ($channelStore[note.id]) {
+			let originalNote = $channelStore[note.id];
+			//Update new record;
+			note.seenOn = [...new Set(...note.seenOn, ...originalNote.seenOn)];
+		}
 
-	const onMetaReceived = (meta) => {
-		let newContent = {};
-		newContent[meta.pubkey] = meta;
-		newContent = { ...newContent, ...$profilesStore };
-		profilesStore.set(newContent);
-		// console.log(meta);
-		database.addProfile(meta);
-	};
+		//Think later.
+		// let updatedStore = { ...$contentStore };
+		// updatedStore[note.id] = note
 
-	const onProfileInformationReceived = (meta) => {
-		userStore.set({ ...$userStore, profile: meta });
-	};
+		// if (Object.keys(updatedStore).length > 150) {
+		// 	let lastElementId = Object.keys(x).slice(-1)[0];
+		// 	delete updatedStore[lastElementId];
+		// }
 
-	function init(key) {
-		NostrManager(key)
-			.setNoteHandler(noteHandler)
-			.setMetaHandler(onMetaReceived)
-			.setChannelCreate(onChannelCreateReceived)
-			.setProfileUpdate(onProfileInformationReceived)
-			.setExternalProfileReference((pubkey) => database.getProfile(pubkey))
-			.init()
-			.getFeed();
-	}
+		contentStore.set({ ...$contentStore, [note.id]: note });
+	};
 
 	$: {
 		pubkey = $userStore.keys.public;
 		if (pubkey && !isInitiated) {
 			isInitiated = true;
-			init(pubkey);
+			NostrManager(pubkey)
+				.on('note', noteHandler)
+				.on('connect', onRelayConnected)
+				.on('profile', userProfileHandler)
+				.init();
+			// init(pubkey);
 		}
 	}
 
@@ -120,8 +132,8 @@
 					<!-- Side Bar Content -->
 					<div class="bar">
 						<BarServers />
-						<BarLastUser />
-						<BarRooms />
+						<!-- <BarLastUser /> -->
+						<!-- <BarRooms /> -->
 					</div>
 
 					<!-- /Side Bar Content -->

@@ -69,6 +69,10 @@
 		/* @apply md:max-h-[calc(100vh-6rem)]; */
 	}
 
+	.root .mid {
+		@apply flex-col flex gap-3;
+	}
+
 	.nav {
 		min-width: 6rem;
 	}
@@ -195,6 +199,14 @@
 	.contentBlock .actions button,
 	.contentBlock .actions .icon {
 		@apply w-6 h-8 flex items-center;
+	}
+
+	.contentBlock .servers {
+		@apply bg-content px-3 rounded-md;
+	}
+
+	.contentBlock .servers .info {
+		@apply h-8 flex gap-3 items-center;
 	}
 
 	.contentBlock textarea {

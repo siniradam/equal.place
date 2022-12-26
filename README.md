@@ -28,18 +28,25 @@ This is a project in progress. Some features aren't implemented.
 - Platform icon is displayed if exists.
 - Settings page added. (Not stored)
 - Relay status icons (testing)
+- Total overhaul, I wrote a new version of the nostr-manager, and socket part moved to another file.
+- To register handler, now .on() used.
+
+## Next In Line
+- Signing requests.
+- Fetch contacts, get & get feed.
+- CRD: //Connect & Request & Destroy.
+- Relay Management Page.
 
 ## In progress
-- User settings
-- Bech32
+- Bech32 (npup stuff)
 - Storing; relays, notes, rooms ...
+- User settings
+
 
 ## Bugs 
 - 🟩 Refreshes on navigation.
 - 🟩 Connect spam, get rid of `isInitiated`.
 
-## Next In Line
-- change setXXX function format to "ON" format.
 
 ## TODO
 - ✅ Store fetched users

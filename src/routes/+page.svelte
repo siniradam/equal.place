@@ -25,9 +25,7 @@
 	{#if $siteStore.unread}
 		<div>Load {$siteStore.unread > 50 ? '50' : $siteStore.unread} more</div>
 	{/if}
-	{#each $contentStore as item}
-		<FeedItem {item}>
-			{@html item.content}
-		</FeedItem>
+	{#each Object.entries($contentStore) as [id, item]}
+		<FeedItem {item} />
 	{/each}
 </div>
