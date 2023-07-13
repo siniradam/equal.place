@@ -1,3 +1,6 @@
+# This project isn't maintained.
+I won't be updating this for a while.
+
 
 [![GitHub stars](https://img.shields.io/github/stars/siniradam/equal.place.svg?style=social&label=Star&maxAge=2592000)](https://GitHub.com/siniradam/equal.place/stargazers/)
 [![GitHub followers](https://img.shields.io/github/followers/siniradam.svg?style=social&label=Follow&maxAge=2592000)](https://github.com/siniradam?tab=followers) 
